@@ -1,54 +1,66 @@
 # LGSM
- LOCAL GROCERY SHOP MANAGEMENT APP
+
+LOCAL GROCERY SHOP MANAGEMENT APP
 
 # 🛒 Local Grocery Shop Management App
 
-![App Banner](https://via.placeholder.com/1200x400?text=App+Banner) 
+![App Banner](https://via.placeholder.com/1200x400?text=App+Banner)
+
 ## 🚀 Overview
-This repository contains the source code for the *Local Grocery Shop Management App*, designed to simplify and streamline grocery shop operations in India. The app provides distinct interfaces for shopkeepers and customers, addressing their unique needs while enhancing efficiency and user experience.
+
+This repository contains the source code for the _Local Grocery Shop Management App_, designed to simplify and streamline grocery shop operations in India. The app provides distinct interfaces for shopkeepers and customers, addressing their unique needs while enhancing efficiency and user experience.
 
 ---
 
 ## ✨ Features
 
-### *Shopkeeper Interface*
-1. *Inventory Management*: 
+### _Shopkeeper Interface_
+
+1. _Inventory Management_:
    - Add, edit, or delete packaged and loose items.
    - View stock levels and get low-stock notifications.
-   
-2. *Orders Management*:
+2. _Orders Management_:
+
    - Display all customer orders with details (items, amounts, pickup time).
    - Update order statuses (Pending, Ready for Pickup, Completed).
 
-3. *Customer Debt Management*:
+3. _Customer Debt Management_:
+
    - View and manage customers using the debt system.
    - Track debt balances with a ₹2000 limit.
 
-4. *Reports and Analytics*:
+4. _Reports and Analytics_:
+
    - Daily, weekly, and monthly sales reports.
    - Inventory performance insights.
 
-5. *Dashboard*:
+5. _Dashboard_:
    - Overview of sales, inventory, and active orders.
 
-### *Customer Interface*
-1. *Product Catalog*:
+### _Customer Interface_
+
+1. _Product Catalog_:
+
    - Browse packaged and loose items.
    - Search and filter by categories.
 
-2. *Cart Management*:
+2. _Cart Management_:
+
    - Add and edit items with quantity/weight options.
 
-3. *Pickup Scheduling*:
+3. _Pickup Scheduling_:
+
    - Choose a convenient pickup time slot.
 
-4. *Payment Options*:
+4. _Payment Options_:
+
    - Pay bills through UPI, card, or the debt system.
 
-5. *Order History*:
+5. _Order History_:
+
    - View past orders and reorder quickly.
 
-6. *Debt Overview*:
+6. _Debt Overview_:
    - Track debt usage and payment history.
 
 ---
@@ -56,49 +68,56 @@ This repository contains the source code for the *Local Grocery Shop Management 
 ## 📱 App Pages
 
 ### Shopkeeper Interface
-- *Login Page*
-- *Dashboard*
-- *Inventory Management*
-- *Customer Debt Management*
-- *Orders Management*
-- *Reports and Analytics*
+
+- _Login Page_
+- _Dashboard_
+- _Inventory Management_
+- _Customer Debt Management_
+- _Orders Management_
+- _Reports and Analytics_
 
 ### Customer Interface
-- *Login/Sign-Up Page*
-- *Product Catalog*
-- *Cart Page*
-- *Pickup Time Slot Selection*
-- *Payment Page*
-- *Order Confirmation*
-- *Order History*
-- *Debt Overview*
+
+- _Login/Sign-Up Page_
+- _Product Catalog_
+- _Cart Page_
+- _Pickup Time Slot Selection_
+- _Payment Page_
+- _Order Confirmation_
+- _Order History_
+- _Debt Overview_
 
 ### Shared Pages
-- *Splash Screen*
-- *Profile Page*
-- *Settings Page*
-- *Error/404 Page*
+
+- _Splash Screen_
+- _Profile Page_
+- _Settings Page_
+- _Error/404 Page_
 
 ---
 
 ## 🛠️ Technology Stack
-- *Frontend*: Flutter
-- *Backend*: Node.js with Express
-- *Database*: MongoDB
-- *Authentication*: JWT-based authentication
-- *State Management*: Provider/Redux (for Flutter)
+
+- _Frontend_: Flutter
+- _Backend_: Node.js with Express
+- _Database_: MongoDB
+- _Authentication_: JWT-based authentication
+- _State Management_: Provider/Redux (for Flutter)
 
 ---
 
 ## 📷 Screenshots
 
-### *Shopkeeper Dashboard*
-![Shopkeeper Dashboard](https://via.placeholder.com/600x400?text=Shopkeeper+Dashboard) 
+### _Shopkeeper Dashboard_
 
-### *Customer Product Catalog*
-![Customer Product Catalog](https://via.placeholder.com/600x400?text=Customer+Catalog) 
+![Shopkeeper Dashboard](https://via.placeholder.com/600x400?text=Shopkeeper+Dashboard)
 
-### *Order Management*
+### _Customer Product Catalog_
+
+![Customer Product Catalog](https://via.placeholder.com/600x400?text=Customer+Catalog)
+
+### _Order Management_
+
 ![Order Management](https://via.placeholder.com/600x400?text=Order+Management)
 
 ---
@@ -106,12 +125,15 @@ This repository contains the source code for the *Local Grocery Shop Management 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Flutter SDK installed ([Guide](https://flutter.dev/docs/get-started/install))
 - Node.js installed ([Guide](https://nodejs.org/en/download/))
 - MongoDB instance running locally or on the cloud.
 
 ### Installation
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/grocery-shop-management.git
    cd grocery-shop-management
+   ```
