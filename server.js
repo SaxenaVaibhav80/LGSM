@@ -21,81 +21,87 @@ app.get("/",(req,res)=>
 
 // ---------- creating route for signup post request handler  ------------------>
 
-app.post("/api/signup",async(req,res)=>
+app.post("/signup",async(req,res)=>
 {
   const username = req.body.username  // ye signup jab tum kroge to whn se data ayega name wala  or username me store ho jyega 
   const email = req.body.email// ye signup jab tum kroge to whn se data ayega email wala  or username me store ho jyega 
   const password = req.body.password// ye signup jab tum kroge to whn se data ayega password wala  or username me store ho jyega 
   const phone = req.body.phone// ye signup jab tum kroge to whn se data ayega phone number wala  or username me store ho jyega 
 
+  try {
 
-  const isExist = await userModel.find({
-    email:email
-  })
-
-  if(!(username && email && password && phone))
-    {
-        res.status(400).send("all field are required")
-    }
-  if(isExist)
-    {
-     res.status(409).json("user already exist")
+    if (!(username && email && password && phone)) {
+      return res.status(400).json({ error: "All fields are required" });
     }
 
-  else{
-    const encPass= await bcrypt.hash(password,10)   // yhn password ko encrypt kardia h maine okay?
+    const isExist = await userModel.findOne({ email: email });
+    if (isExist) {
+      return res.status(409).json({ error: "User already exists" });
+    }
+    const encPass = await bcrypt.hash(password, 10);    // yhn password encrypted ho rha h ...hum encrypted password save kr rhe h Data base me
+
+
     const user = await userModel.create({
-        name:username,
-        email:email,
-        password:encPass,  // Yhn encrpted pass stpre ho rha h ok
-        phone:phone
-      })
+      name: username,
+      email: email,
+      password: encPass,
+      phone: phone,
+    });
 
-    res.redirect("/")
+    res.status(201).json({
+      message: "us er created",
+      userId: user._id,
+    });
+  } catch (err) {
+    console.error("Signup Error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
+});
 
-})
 
 
 // ---------- login post request handler ------------------------------->
 
 
-app.post("/api/login",async(req,res)=>
+app.post("/login",async(req,res)=>
 {
 
     const email = req.body.email
     const password = req.body.password
-    try{
-        const user = await userModel.findOne({email:email})
-        if(user)
-        {
-            const passverify=await bcrypt.compare(password,user.password)  // password verification ho rha h agr shi hoga to hi neeche ki cheeze execute hogi else koi verification error ayega wo catch block me jyega 
-            if(passverify){
-                const token = jwt.sign(
-                    {id:user._id,name:user.firstname},
-                    secret_key,
-                    {
-                     expiresIn:'24h'                             //24 hr me exoire hoga token
-                    }
-                )
-                const options={
-                    expires:new Date(Date.now()+24*60*60*1000),   // 24 hr me cookie se token v remove ho jyega after expiry
-                    httpOnly:true
-                };
-                res.status(200).cookie("token",token,options)
-                res.redirect("/TODO")
-            }
-            else{
-                res.status(400).send("password incorrect")
-            }
-        }
-
-    }catch(err)
-    { 
-        res.status(400).json(err)
-    }
     
-
+    try {
+      
+        const user = await userModel.findOne({ email: email });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+    
+        const passverify = await bcrypt.compare(password, user.password);  // hum verify kr rhe h password
+        if (!passverify) {
+          return res.status(400).json({ error: "Incorrect password" });
+        }
+    
+    
+        const token = jwt.sign(
+          { id: user._id, name: user.name },
+          secret_key,
+          { expiresIn: "24h" }
+        );
+    
+        const options = {
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+          httpOnly: true,
+        };
+    
+        res.status(200).cookie("token", token, options).json({
+          message: "loggedin successful",
+          token: token,
+          userId: user._id,
+        });
+      } catch (err) {
+        console.error("Login Error:", err);
+        res.status(500).json({ error: "any server error" });
+      }
 })
 
 
