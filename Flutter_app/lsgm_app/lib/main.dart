@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lsgm_app/routes/navigation.dart';
 import 'package:lsgm_app/theme/app_theme.dart';
 
 void main() {
@@ -15,7 +16,9 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      initialRoute: AppRoutes.initial,
+      onUnknownRoute: AppRoutes.onUnknownRoute,
+      routes: AppRoutes.routes,
     );
   }
 }
-
