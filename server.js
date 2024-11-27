@@ -3,7 +3,7 @@ const db = require("./config/dbConfig.js")
 const http= require("http")
 const dotenv = require("dotenv")
 dotenv.config()
-const userModel = require("./models/user.js")
+const userModel = require("./models/customers.js")
 const port = process.env.PORT
 const app = express()
 
