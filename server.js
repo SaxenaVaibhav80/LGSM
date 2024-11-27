@@ -2,6 +2,7 @@ const express= require("express")
 const db = require("./config/dbConfig.js")
 const http= require("http")
 const dotenv = require("dotenv")
+const userModel = require("./models/user.js")
 dotenv.config()
 const app = express()
 
