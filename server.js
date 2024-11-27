@@ -10,6 +10,7 @@ const app = express()
 const jwt = require("jsonwebtoken")
 const bodyParser = require("body-parser")
 const server = http.createServer(app)
+const secret_key = process.env.secret_key
 app.use(bodyParser.urlencoded({extended:true}))
 
 app.get("/",(req,res)=>
@@ -52,6 +53,48 @@ app.post("/signup",async(req,res)=>
 
     res.redirect("/")
   }
+
+})
+
+
+// ---------- login post request handler ------------------------------->
+
+
+app.post("/login",async(req,res)=>
+{
+
+    const email = req.body.email
+    const password = req.body.password
+    try{
+        const user = await userModel.findOne({email:email})
+        if(user)
+        {
+            const passverify=await bcrypt.compare(password,user.password)  // password verification ho rha h agr shi hoga to hi neeche ki cheeze execute hogi else koi verification error ayega wo catch block me jyega 
+            if(passverify){
+                const token = jwt.sign(
+                    {id:user._id,name:user.firstname},
+                    secret_key,
+                    {
+                     expiresIn:'24h'                             //24 hr me exoire hoga token
+                    }
+                )
+                const options={
+                    expires:new Date(Date.now()+24*60*60*1000),   // 24 hr me cookie se token v remove ho jyega after expiry
+                    httpOnly:true
+                };
+                res.status(200).cookie("token",token,options)
+                res.redirect("/TODO")
+            }
+            else{
+                res.status(400).send("password incorrect")
+            }
+        }
+
+    }catch(err)
+    { 
+        res.status(400).json(err)
+    }
+    
 
 })
 
