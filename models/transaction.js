@@ -2,11 +2,7 @@
 const mongoose= require("mongoose");
 
 const TransactionsSchema = new mongoose.Schema({
-    transaction_id:{ 
-      type: String, 
-      required: true,
-      unique: true 
-    },
+
     order_id:{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Orders',

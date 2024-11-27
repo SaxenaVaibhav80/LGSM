@@ -1,11 +1,6 @@
 const mongoose= require("mongoose")
 
 const InventorySchema = new mongoose.Schema({
-    inventory_id: { 
-        type: String,
-        required: true,
-        unique: true 
-    },
     shop_id: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Shops', 

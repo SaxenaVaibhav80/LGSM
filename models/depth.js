@@ -1,11 +1,7 @@
 const mongoose= require("mongoose")
 
 const DebtSystemSchema = new mongoose.Schema({
-    debt_id: { 
-        type: String, 
-        required: true, 
-        unique: true 
-    },
+
     customer_id: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Customers', 
