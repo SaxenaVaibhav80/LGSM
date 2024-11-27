@@ -29,7 +29,10 @@ const CustomerSchema = new mongoose.Schema({
         ref: 'Shops',
         required: true 
     },
-    order_history: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }]
+    order_history: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Orders'
+    }]
 });
 
 module.exports = mongoose.model('Customers', CustomerSchema);
