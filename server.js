@@ -21,7 +21,7 @@ app.get("/",(req,res)=>
 
 // ---------- creating route for signup post request handler  ------------------>
 
-app.post("/signup",async(req,res)=>
+app.post("/api/signup",async(req,res)=>
 {
   const username = req.body.username  // ye signup jab tum kroge to whn se data ayega name wala  or username me store ho jyega 
   const email = req.body.email// ye signup jab tum kroge to whn se data ayega email wala  or username me store ho jyega 
@@ -60,7 +60,7 @@ app.post("/signup",async(req,res)=>
 // ---------- login post request handler ------------------------------->
 
 
-app.post("/login",async(req,res)=>
+app.post("/api/login",async(req,res)=>
 {
 
     const email = req.body.email
