@@ -1,4 +1,4 @@
-const mongoose= require("mongoose")
+const mongoose = require("mongoose");
 
 const ShopkeeperSchema = new mongoose.Schema({
     name: { 
@@ -17,7 +17,12 @@ const ShopkeeperSchema = new mongoose.Schema({
     password: { 
         type: String, 
         required: true 
+    },
+    shop: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Shops", 
+        required: true 
     }
 });
 
-module.exports = mongoose.model('Users', ShopkeeperSchema);
+module.exports = mongoose.model("ShopKeeper", ShopkeeperSchema);
