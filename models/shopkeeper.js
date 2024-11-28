@@ -1,7 +1,12 @@
+
 const mongoose = require("mongoose");
 
 const ShopkeeperSchema = new mongoose.Schema({
-    name: { 
+    ShopName: { 
+        type: String,
+        required: true
+    },
+    ShopkeeperName: { 
         type: String,
         required: true
     },
@@ -10,7 +15,15 @@ const ShopkeeperSchema = new mongoose.Schema({
         required: true,
         unique: true 
     },
+    address:{
+        type: String,
+        required: true,
+    },
     phone: { 
+        type: String, 
+        required: true 
+    },
+    pincode:{
         type: String, 
         required: true 
     },
@@ -21,8 +34,10 @@ const ShopkeeperSchema = new mongoose.Schema({
     shop: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: "Shops", 
-        required: true 
+        required: true ,
+        default:null
     }
+    
 });
 
 module.exports = mongoose.model("ShopKeeper", ShopkeeperSchema);
