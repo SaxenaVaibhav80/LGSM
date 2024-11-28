@@ -130,6 +130,51 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// ---------------------------- Get uuid -------------------------->
+app.post("/api/getuid",async(req,res)=>
+{
+  const token = req.cookies.token
+  if(token)
+  {
+    try{
+
+      const verification = jwt.verify(token,secret_key)
+      const id = verification.id
+      const user = await shopkeeperModel.findOne({_id:id})
+      const shopname = user. ShopName
+      const pin = user.pincode
+      const existCode = await shopkeeperModel.find({pincode:pin})
+      const quantity = existCode.length
+      const last_id = user._id.toString().slice(-3);  // ye last ke 3 digit dega obj   _id ke 
+      const abbr = shopname.split(" ").map(word=>word[0]).join('')
+      const upperabbr= abbr.toUpperCase();
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if(existCode)
+      {
+        const uid = `${pin}${last_id}${abbr}${quantity+1}`
+        res.status(200).json({
+          uid:uid
+        })
+      }
+      else{
+        const uid = `${pin}${last_id}${abbr}${1}`
+        res.status(200).json({
+          uid:uid
+        })
+      }
+
+    }catch(err)
+    {
+       res.send(409).json("malwared token")
+    }
+  }
+})
+
+
 // Start server
 const server = http.createServer(app);
 server.listen(port, () => {
