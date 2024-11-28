@@ -49,7 +49,7 @@ app.post("/api/signup",async(req,res)=>
     });
 
     res.status(201).json({
-      message: "us er created",
+      message: "user created",
       userId: user._id,
     });
   } catch (err) {
