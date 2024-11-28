@@ -72,7 +72,7 @@ class RoleSelectionScreen extends StatelessWidget {
                         onPressed: () {
                           // Navigate to shopkeeper flow
                           AppRoutes.navigateTo(
-                              context, AppRoutes.shopkeeperSignup);
+                              context, AppRoutes.shopkeeperLogin);
                         },
                         icon: const Icon(Icons.store, size: 24),
                         label: const Text('Continue as Shopkeeper'),

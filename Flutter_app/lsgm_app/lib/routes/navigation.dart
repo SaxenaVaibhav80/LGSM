@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/screens/customer_login_screen.dart';
 import 'package:lsgm_app/screens/customer_signup_screen.dart';
+import 'package:lsgm_app/screens/shopkeeper_login_screen.dart';
 import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
 import '../screens/role_selection_screen.dart';
 
@@ -16,6 +17,7 @@ class AppRoutes {
   static const String customerLogin = '/login';
   static const String customerSignup = '/signup';
   static const String shopkeeperSignup = '/shopkeeper/signup';
+  static const String shopkeeperLogin = '/shopkeeper/login';
 
   // Customer routes
   static const String customerHome = '/customer/home';
@@ -36,6 +38,7 @@ class AppRoutes {
         customerLogin: (context) => const LoginScreen(),
         customerSignup: (context) => const SignupScreen(),
         shopkeeperSignup: (context) => const ShopkeeperSignupScreen(),
+        shopkeeperLogin: (context) => const ShopkeeperLoginScreen(),
         // Customer routes
         // customerHome: (context) => const CustomerHomeScreen(),
         // customerProfile: (context) => const CustomerProfileScreen(),

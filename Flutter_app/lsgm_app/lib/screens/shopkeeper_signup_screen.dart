@@ -61,16 +61,9 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
                 Align(
                   alignment: Alignment.topRight,
                   child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.tertiary,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(100),
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100),
-                      ),
-                    ),
+                    width: 200,
+                    height: 200,
+                    child: Image.asset('assets/image/shopkeeper.png'),
                   ),
                 ),
                 const SizedBox(height: 24),

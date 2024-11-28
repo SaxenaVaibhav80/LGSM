@@ -18,6 +18,10 @@ const ShopSchema = new mongoose.Schema({
         type: String,
         required: true 
     },
+    pincode: {
+        type: String,
+        required: true
+    },
     inventory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Inventory' }],
     orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }],
     debt_customers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Customers' }]
