@@ -64,7 +64,7 @@ app.post("/api/signup", async (req, res) => {
         userId: user._id,
         email: user.email,
         name: user.name
-      }
+     
     });
   } catch (err) {
     console.error("Signup Error:", err);

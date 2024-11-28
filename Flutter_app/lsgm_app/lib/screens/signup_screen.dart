@@ -1,6 +1,7 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,7 +15,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   final _phoneController = TextEditingController(); // Added phone controller
+
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -25,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
     _phoneController.dispose();
     super.dispose();
   }
@@ -56,6 +60,8 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text('Error: ${response.body}')),
       );
     }
+ 
+    super.dispose();
   }
 
   @override
@@ -109,6 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
+
                 // Phone field
                 TextFormField(
                   controller: _phoneController,
@@ -129,6 +136,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
+
                 // Email field
                 TextFormField(
                   controller: _emailController,
@@ -225,6 +233,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         _phoneController
                             .text, // Pass phone number to the signup function
                       );
+
                     }
                   },
                   child: Row(
