@@ -155,13 +155,13 @@ app.post("/api/getuid",async(req,res)=>
       
       if(existCode)
       {
-        const uid = `${pin}${last_id}${abbr}${quantity+1}`
+        const uid = `${pin}${last_id}${upperabbr}${quantity+1}`
         res.status(200).json({
           uid:uid
         })
       }
       else{
-        const uid = `${pin}${last_id}${abbr}${1}`
+        const uid = `${pin}${last_id}${upperabbr}${1}`
         res.status(200).json({
           uid:uid
         })
