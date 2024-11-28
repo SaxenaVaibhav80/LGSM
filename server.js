@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
+const shopkeeperModel = require("./models/shopkeeper.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
