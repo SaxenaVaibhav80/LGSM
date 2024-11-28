@@ -1,108 +1,136 @@
-const express= require("express")
-const db = require("./config/dbConfig.js")
-const http= require("http")
-const dotenv = require("dotenv")
-dotenv.config()
-const bcrypt=require("bcrypt")
-const userModel = require("./models/user.js")
-const port = process.env.PORT
-const app = express()
-const jwt = require("jsonwebtoken")
-const bodyParser = require("body-parser")
-const server = http.createServer(app)
-const secret_key = process.env.secret_key
-app.use(bodyParser.urlencoded({extended:true}))
+const express = require("express");
+const db = require("./config/dbConfig.js");
+const http = require("http");
+const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
+const userModel = require("./models/user.js");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-app.get("/",(req,res)=>
-{
-    res.send("working")
-})
+dotenv.config();
 
+const app = express();
+const port = process.env.PORT || 3000;
+const secret_key = process.env.SECRET_KEY;
 
-// ---------- creating route for signup post request handler  ------------------>
+// Middleware
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true // Allow credentials
+}));
+app.use(express.json()); // For parsing application/json
+app.use(cookieParser()); // For parsing cookies
+app.use(express.urlencoded({ extended: true }));
 
-app.post("/api/signup",async(req,res)=>
-{
-  const username = req.body.username  // ye signup jab tum kroge to whn se data ayega name wala  or username me store ho jyega 
-  const email = req.body.email// ye signup jab tum kroge to whn se data ayega email wala  or username me store ho jyega 
-  const password = req.body.password// ye signup jab tum kroge to whn se data ayega password wala  or username me store ho jyega 
-  const phone = req.body.phone// ye signup jab tum kroge to whn se data ayega phone number wala  or username me store ho jyega 
+// Health check route
+app.get("/", (req, res) => {
+  res.json({ status: "Server is running" });
+});
+
+// Signup route
+app.post("/api/signup", async (req, res) => {
+  const { username, email, password, phone } = req.body;
 
   try {
-
     if (!(username && email && password && phone)) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ 
+        success: false,
+        message: "All fields are required" 
+      });
     }
 
-    const isExist = await userModel.findOne({ email: email });
+    const isExist = await userModel.findOne({ email });
     if (isExist) {
-      return res.status(409).json({ error: "User already exists" });
+      return res.status(409).json({ 
+        success: false,
+        message: "User already exists" 
+      });
     }
-    const encPass = await bcrypt.hash(password, 10);    // yhn password encrypted ho rha h ...hum encrypted password save kr rhe h Data base me
 
+    const encPass = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
       name: username,
-      email: email,
+      email,
       password: encPass,
-      phone: phone,
+      phone,
     });
 
     res.status(201).json({
-      message: "user created",
-      userId: user._id,
+      success: true,
+      message: "User created successfully",
+      data: {
+        userId: user._id,
+        email: user.email,
+        name: user.name
+     
     });
   } catch (err) {
     console.error("Signup Error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
   }
 });
 
+// Login route
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
 
+    const passverify = await bcrypt.compare(password, user.password);
+    if (!passverify) {
+      return res.status(401).json({ 
+        success: false,
+        message: "Incorrect password" 
+      });
+    }
 
-// ---------- login post request handler ------------------------------->
+    const token = jwt.sign(
+      { id: user._id, name: user.name },
+      secret_key,
+      { expiresIn: "24h" }
+    );
 
+    // Set token in cookie
+    res.cookie('token', token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: 'none' // Required for cross-origin cookies
+    });
 
-app.post("/api/login",async(req,res)=>
-{
-
-    const email = req.body.email
-    const password = req.body.password
-    
-    try {
-      
-        const user = await userModel.findOne({ email: email });
-        if (!user) {
-          return res.status(404).json({ error: "User not found" });
-        }
-    
-        const passverify = await bcrypt.compare(password, user.password);  // hum verify kr rhe h password
-        if (!passverify) {
-          return res.status(400).json({ error: "Incorrect password" });
-        }
-    
-    
-        const token = jwt.sign(
-          { id: user._id, name: user.name },
-          secret_key,
-          { expiresIn: "24h" }
-        );
-    
-        const options = {
-          expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-          httpOnly: true,
-        };
-    
-        res.status(200).cookie("token", token, options).json({
-          message: "loggedin successful",
-          token: token,
-          userId: user._id,
-        });
-      } catch (err) {
-        console.error("Login Error:", err);
-        res.status(500).json({ error: "any server error" });
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        token,
+        userId: user._id,
+        name: user.name,
+        email: user.email
       }
-})
+    });
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
+  }
+});
 
-
-server.listen(port)
+// Start server
+const server = http.createServer(app);
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
