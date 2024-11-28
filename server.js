@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
+const shopkeeperModel = require("./models/shopkeeper.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -67,7 +68,7 @@ app.post("/api/signup", async (req, res) => {
         userId: user._id,
         email: user.email,
         name: user.name
-      } 
+      }
     });
   } catch (err) {
     console.error("Signup Error:", err);
