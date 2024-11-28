@@ -1,30 +1,64 @@
-import 'package:flutter/material.dart';
-import 'package:lsgm_app/screens/login_screen.dart';
-import 'package:lsgm_app/screens/signup_screen.dart';
+// lib/config/routes.dart
 
+import 'package:flutter/material.dart';
+import 'package:lsgm_app/screens/customer_login_screen.dart';
+import 'package:lsgm_app/screens/customer_signup_screen.dart';
+import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
+import '../screens/role_selection_screen.dart';
 
 
 class AppRoutes {
   // Route names as static constants
   static const String initial = '/';
-  static const String login = '/login';
-  static const String signup = '/signup';
+  static const String roleSelection = '/role-selection';
+
+  // Authentication routes
+  static const String customerLogin = '/login';
+  static const String customerSignup = '/signup';
+  static const String shopkeeperSignup = '/shopkeeper/signup';
+
+  // Customer routes
+  static const String customerHome = '/customer/home';
+  static const String customerProfile = '/customer/profile';
+  static const String customerCart = '/customer/cart';
+  static const String customerOrders = '/customer/orders';
+
+  // Shopkeeper routes
+  static const String shopkeeperHome = '/shopkeeper/home';
+  static const String shopkeeperProfile = '/shopkeeper/profile';
+  static const String shopkeeperInventory = '/shopkeeper/inventory';
+  static const String shopkeeperOrders = '/shopkeeper/orders';
 
   // Route map
   static Map<String, WidgetBuilder> get routes => {
-        initial: (context) =>
-            const LoginScreen(), // Setting login as initial screen
-        login: (context) => const LoginScreen(),
-        signup: (context) => const SignupScreen(),
+        initial: (context) => const RoleSelectionScreen(),
+        roleSelection: (context) => const RoleSelectionScreen(),
+        customerLogin: (context) => const LoginScreen(),
+        customerSignup: (context) => const SignupScreen(),
+        shopkeeperSignup: (context) => const ShopkeeperSignupScreen(),
+        // Customer routes
+        // customerHome: (context) => const CustomerHomeScreen(),
+        // customerProfile: (context) => const CustomerProfileScreen(),
+        // customerCart: (context) => const CustomerCartScreen(),
+        // customerOrders: (context) => const CustomerOrdersScreen(),
+
+        // // Shopkeeper routes
+        // shopkeeperHome: (context) => const ShopkeeperHomeScreen(),
+        // shopkeeperProfile: (context) => const ShopkeeperProfileScreen(),
+        // shopkeeperInventory: (context) => const ShopkeeperInventoryScreen(),
+        // shopkeeperOrders: (context) => const ShopkeeperOrdersScreen(),
       };
 
   // Handle unknown routes
   static Route<dynamic> onUnknownRoute(RouteSettings settings) {
     return MaterialPageRoute(
       builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+        ),
         body: Center(
           child: Text(
-            'No route defined for ${settings.name}',
+            'Route ${settings.name} not found',
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -33,25 +67,23 @@ class AppRoutes {
   }
 
   // Navigation methods
-  static void navigateToLogin(BuildContext context) {
-    Navigator.pushReplacementNamed(context, login);
+  static void navigateTo(BuildContext context, String routeName) {
+    Navigator.pushNamed(context, routeName);
   }
 
-  static void navigateToSignup(BuildContext context) {
-    Navigator.pushNamed(context, signup);
+  static void navigateToAndReplace(BuildContext context, String routeName) {
+    Navigator.pushReplacementNamed(context, routeName);
   }
 
-  // Go back to previous screen
-  static void goBack(BuildContext context) {
-    Navigator.pop(context);
-  }
-
-  // Navigate and remove all previous routes
-  static void navigateAndRemoveUntil(BuildContext context, String routeName) {
+  static void navigateToAndClear(BuildContext context, String routeName) {
     Navigator.pushNamedAndRemoveUntil(
       context,
       routeName,
       (route) => false,
     );
+  }
+
+  static void goBack(BuildContext context) {
+    Navigator.pop(context);
   }
 }

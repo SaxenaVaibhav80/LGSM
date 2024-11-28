@@ -11,9 +11,12 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
+const host = '0.0.0.0'; 
 const port = process.env.PORT || 3000;
 const secret_key = process.env.SECRET_KEY;
-
+app.listen(port, host, () => {
+    console.log(`Server is running on http://${host}:${port}`);
+});
 // Middleware
 app.use(cors({
   origin: true, // Allow all origins in development
@@ -64,7 +67,7 @@ app.post("/api/signup", async (req, res) => {
         userId: user._id,
         email: user.email,
         name: user.name
-     
+      } 
     });
   } catch (err) {
     console.error("Signup Error:", err);

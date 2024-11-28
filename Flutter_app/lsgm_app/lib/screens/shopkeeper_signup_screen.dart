@@ -1,24 +1,26 @@
+// lib/screens/auth/shopkeeper_signup_screen.dart
 
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class ShopkeeperSignupScreen extends StatefulWidget {
+  const ShopkeeperSignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<ShopkeeperSignupScreen> createState() => _ShopkeeperSignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _shopNameController = TextEditingController();
+  final _shopAddressController = TextEditingController();
+  final _pinCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  final _phoneController = TextEditingController(); // Added phone controller
-
-  final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
@@ -26,41 +28,12 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
+    _shopNameController.dispose();
+    _shopAddressController.dispose();
+    _pinCodeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  Future<void> signup(
-      String name, String email, String password, String phone) async {
-    const url =
-        'http://localhost:9000/api/signup'; // Ensure your backend is running
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': name,
-        'email': email,
-        'password': password,
-        'phone': phone, // Include phone number in the request
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      // If the signup is successful
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signup Successful!')),
-      );
-      Navigator.pop(context); // Redirect to login or previous page
-    } else {
-      // If there’s an error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.body}')),
-      );
-    }
- 
     super.dispose();
   }
 
@@ -88,25 +61,40 @@ class _SignupScreenState extends State<SignupScreen> {
                 Align(
                   alignment: Alignment.topRight,
                   child: Container(
-                    width: 200,
-                    height: 200,
-                    child: Image.asset('assets/image/basket_image.png'),
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.tertiary,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(100),
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Create Account',
-                  style: theme.textTheme.displayLarge,
+                  'Shopkeeper Registration',
+                  style: theme.textTheme.displaySmall,
                 ),
-                const SizedBox(height: 48),
-                // Full Name field
+                const SizedBox(height: 8),
+                Text(
+                  'Create your shop account',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Shopkeeper Name
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  style: theme.textTheme.bodyLarge,
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your name';
@@ -114,30 +102,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-                // Phone field
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
-                  style: theme.textTheme.bodyLarge,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    if (value.length != 10) {
-                      return 'Phone number must be 10 digits';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Email field
+                // Email
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -145,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  style: theme.textTheme.bodyLarge,
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -156,12 +123,98 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
-                // Password field
+                const SizedBox(height: 20),
+
+                // Phone Number
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter phone number';
+                    }
+                    if (value.length != 10) {
+                      return 'Phone number must be 10 digits';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Shop Name
+                TextFormField(
+                  controller: _shopNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Shop Name',
+                    prefixIcon: Icon(Icons.store_outlined),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter shop name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Shop Address
+                TextFormField(
+                  controller: _shopAddressController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Shop Address',
+                    prefixIcon: Icon(Icons.location_on_outlined),
+                    alignLabelWithHint: true,
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter shop address';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Pin Code
+                TextFormField(
+                  controller: _pinCodeController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'PIN Code',
+                    prefixIcon: Icon(Icons.pin_drop_outlined),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(6),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter PIN code';
+                    }
+                    if (value.length != 6) {
+                      return 'PIN code must be 6 digits';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Password
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
-                  style: theme.textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
@@ -178,9 +231,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                     ),
                   ),
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return 'Please enter password';
                     }
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';
@@ -188,12 +242,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
-                // Confirm Password field
+                const SizedBox(height: 20),
+
+                // Confirm Password
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: !_isConfirmPasswordVisible,
-                  style: theme.textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
                     prefixIcon: const Icon(Icons.lock_outline),
@@ -221,35 +275,21 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 48),
-                // Sign Up button
+                const SizedBox(height: 32),
+
+                // Sign Up Button
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      signup(
-                        _nameController.text,
-                        _emailController.text,
-                        _passwordController.text,
-                        _phoneController
-                            .text, // Pass phone number to the signup function
-                      );
-
+                      // Handle sign up logic
                     }
                   },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('SIGN UP'),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ],
-                  ),
+                  child: const Text('CREATE ACCOUNT'),
                 ),
+
                 const SizedBox(height: 24),
-                // Login link
+
+                // Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -263,6 +303,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

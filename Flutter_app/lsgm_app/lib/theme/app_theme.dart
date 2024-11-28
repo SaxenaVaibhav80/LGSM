@@ -1,21 +1,38 @@
-import 'package:flutter/material.dart';
+// lib/config/theme.dart
 
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static final lightTheme = ThemeData(
+  // Custom Colors
+  static const Color marketGreen = Color(0xFF1E8B4D);
+  static const Color woodBrown = Color(0xFFDEB887);
+  static const Color saveRed = Color(0xFFE41E31);
+  static const Color tileBg = Color(0xFFF5F5F5);
+  static const Color lightGreen = Color(0xFFE8F5E9);
+  static const Color darkGreen = Color(0xFF166B3A);
+
+  // Light Theme
+  static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+
+    // Color Scheme
     colorScheme: const ColorScheme.light(
-      primary: Color(0xFF0F3433), // Dark green
-      secondary: Color(0xFFCEF03F), // Lime accent
-      tertiary: Color(0xFFFFB74D), // Orange accent
+      primary: marketGreen,
+      secondary: woodBrown,
+      tertiary: saveRed,
       surface: Colors.white,
-      background: Color(0xFFFAF9F6), // Slight off-white
+      background: tileBg,
+      error: Color(0xFFB00020),
       onPrimary: Colors.white,
       onSecondary: Colors.black,
       onSurface: Colors.black,
       onBackground: Colors.black,
+      onError: Colors.white,
+      primaryContainer: lightGreen,
+      secondaryContainer: Color(0xFFFFECB3),
+      tertiaryContainer: Color(0xFFFFE5E5),
     ),
 
     // Text Theme
@@ -23,76 +40,128 @@ class AppTheme {
       displayLarge: GoogleFonts.inter(
         fontSize: 32,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
+        letterSpacing: -0.5,
       ),
       displayMedium: GoogleFonts.inter(
         fontSize: 28,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
+        letterSpacing: -0.5,
+      ),
+      displaySmall: GoogleFonts.inter(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+      headlineMedium: GoogleFonts.inter(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
       ),
       titleLarge: GoogleFonts.inter(
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
       ),
       titleMedium: GoogleFonts.inter(
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
+      ),
+      titleSmall: GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Colors.black,
       ),
       bodyLarge: GoogleFonts.inter(
         fontSize: 16,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
+        height: 1.5,
       ),
       bodyMedium: GoogleFonts.inter(
         fontSize: 14,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
+        height: 1.5,
       ),
       labelLarge: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w500,
+        color: Colors.black,
         letterSpacing: 0.5,
       ),
     ),
 
     // AppBar Theme
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       elevation: 0,
-      iconTheme: const IconThemeData(color: Color(0xFF0F3433)),
+      centerTitle: true,
+      iconTheme: const IconThemeData(color: marketGreen),
+      actionsIconTheme: const IconThemeData(color: marketGreen),
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF0F3433),
+        color: Colors.black,
       ),
+      toolbarHeight: 64,
     ),
 
-    // Icon Theme
-    iconTheme: const IconThemeData(
-      color: Color(0xFF0F3433),
-      size: 24,
+    // Bottom Navigation Bar Theme
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: marketGreen,
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+      selectedIconTheme: IconThemeData(size: 24),
+      unselectedIconTheme: IconThemeData(size: 24),
+      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+      unselectedLabelStyle: TextStyle(fontSize: 12),
     ),
 
     // Card Theme
     cardTheme: CardTheme(
-      elevation: 0,
+      color: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      color: Colors.white,
+      margin: const EdgeInsets.all(8),
     ),
 
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF0F3433),
+        backgroundColor: marketGreen,
         foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 56),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        elevation: 0,
+        elevation: 2,
+        shadowColor: marketGreen.withOpacity(0.3),
+        textStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+      ),
+    ),
+
+    // Outlined Button Theme
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: marketGreen,
         minimumSize: const Size(double.infinity, 56),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: marketGreen, width: 2),
+        ),
+        backgroundColor: Colors.white,
         textStyle: GoogleFonts.inter(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -104,7 +173,7 @@ class AppTheme {
     // Text Button Theme
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFF0F3433),
+        foregroundColor: marketGreen,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -113,17 +182,6 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
-        ),
-      ),
-    ),
-
-    // Icon Button Theme
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color(0xFF0F3433),
-        minimumSize: const Size(48, 48),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
         ),
       ),
     ),
@@ -132,27 +190,26 @@ class AppTheme {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      prefixIconColor: Colors.grey[600],
-      suffixIconColor: Colors.grey[600],
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF0F3433), width: 1),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: marketGreen, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.red, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 1),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
       ),
       labelStyle: GoogleFonts.inter(
         fontSize: 16,
@@ -166,7 +223,58 @@ class AppTheme {
         fontSize: 12,
         color: Colors.red,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      prefixIconColor: Colors.grey[600],
+      suffixIconColor: Colors.grey[600],
+      isDense: true,
+    ),
+
+    // Floating Action Button Theme
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: marketGreen,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      sizeConstraints: const BoxConstraints.tightFor(
+        width: 56,
+        height: 56,
+      ),
+    ),
+
+    // List Tile Theme
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      iconColor: marketGreen,
+      tileColor: Colors.white,
+      selectedTileColor: lightGreen,
+      selectedColor: marketGreen,
+      minLeadingWidth: 24,
+      minVerticalPadding: 16,
+    ),
+
+    // Chip Theme
+    chipTheme: ChipThemeData(
+      backgroundColor: lightGreen,
+      disabledColor: Colors.grey[200]!,
+      selectedColor: marketGreen,
+      secondarySelectedColor: marketGreen,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      labelStyle: GoogleFonts.inter(
+        fontSize: 14,
+        color: Colors.black,
+      ),
+      secondaryLabelStyle: GoogleFonts.inter(
+        fontSize: 14,
+        color: Colors.white,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      brightness: Brightness.light,
     ),
 
     // Divider Theme
@@ -174,181 +282,145 @@ class AppTheme {
       color: Color(0xFFE0E0E0),
       thickness: 1,
       space: 24,
-    ),
-  );
-
-  static final darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: const ColorScheme.dark(
-      primary: Color(0xFFCEF03F), // Lime accent becomes primary
-      secondary: Color(0xFF0F3433),
-      tertiary: Color(0xFFFFB74D), // Orange accent
-      surface: Color(0xFF1E1E1E),
-      background: Color(0xFF121212),
-      onPrimary: Colors.black,
-      onSecondary: Colors.white,
-      onSurface: Colors.white,
-      onBackground: Colors.white,
+      indent: 16,
+      endIndent: 16,
     ),
 
-    // Text Theme for dark mode
-    textTheme: TextTheme(
-      displayLarge: GoogleFonts.inter(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
+    // Icon Theme
+    iconTheme: const IconThemeData(
+      color: marketGreen,
+      size: 24,
+      opacity: 1.0,
+    ),
+
+    // Progress Indicator Theme
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: marketGreen,
+      linearTrackColor: lightGreen,
+      circularTrackColor: lightGreen,
+      refreshBackgroundColor: lightGreen,
+    ),
+
+    // Switch Theme
+    switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return marketGreen;
+        }
+        return Colors.grey;
+      }),
+      trackColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return marketGreen.withOpacity(0.5);
+        }
+        return Colors.grey.withOpacity(0.5);
+      }),
+      trackOutlineColor: MaterialStateProperty.resolveWith((states) {
+        return Colors.transparent;
+      }),
+    ),
+
+    // Checkbox Theme
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return marketGreen;
+        }
+        return Colors.transparent;
+      }),
+      checkColor: MaterialStateProperty.all(Colors.white),
+      side: BorderSide(color: Colors.grey[400]!),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
       ),
-      displayMedium: GoogleFonts.inter(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-      titleLarge: GoogleFonts.inter(
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      ),
-      titleMedium: GoogleFonts.inter(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-        color: Colors.white,
-      ),
-      bodyLarge: GoogleFonts.inter(
-        fontSize: 16,
-        color: Colors.white,
-      ),
-      bodyMedium: GoogleFonts.inter(
+    ),
+
+    // Radio Theme
+    radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return marketGreen;
+        }
+        return Colors.grey[400];
+      }),
+    ),
+
+    // Slider Theme
+    sliderTheme: SliderThemeData(
+      activeTrackColor: marketGreen,
+      inactiveTrackColor: lightGreen,
+      thumbColor: marketGreen,
+      overlayColor: const Color(0x291E8B4D),
+      valueIndicatorColor: marketGreen,
+      trackHeight: 4,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
+    ),
+
+    // SnackBar Theme
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: Colors.black87,
+      contentTextStyle: GoogleFonts.inter(
         fontSize: 14,
         color: Colors.white,
       ),
-      labelLarge: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 0.5,
-        color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
       ),
+      behavior: SnackBarBehavior.floating,
     ),
 
-    // AppBar Theme for dark mode
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      iconTheme: const IconThemeData(color: Colors.white),
+    // Dialog Theme
+    dialogTheme: DialogTheme(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: Colors.black,
+      ),
+      contentTextStyle: GoogleFonts.inter(
+        fontSize: 16,
+        color: Colors.black87,
       ),
     ),
 
-    // Icon Theme for dark mode
-    iconTheme: const IconThemeData(
+    // Popup Menu Theme
+    popupMenuTheme: PopupMenuThemeData(
       color: Colors.white,
-      size: 24,
-    ),
-
-    // Card Theme for dark mode
-    cardTheme: CardTheme(
-      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      color: const Color(0xFF1E1E1E),
+      elevation: 4,
+      textStyle: GoogleFonts.inter(
+        fontSize: 14,
+        color: Colors.black87,
+      ),
     ),
+  );
 
-    // Elevated Button Theme for dark mode
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFCEF03F),
-        foregroundColor: Colors.black,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        elevation: 0,
-        minimumSize: const Size(double.infinity, 56),
-        textStyle: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
+  // Dark Theme
+  static final ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(
+      primary: marketGreen,
+      secondary: woodBrown,
+      tertiary: saveRed,
+      surface: Colors.grey[900]!,
+      background: Colors.black,
+      error: Colors.red[700]!,
+      onPrimary: Colors.white,
+      onSecondary: Colors.black,
+      onSurface: Colors.white,
+      onBackground: Colors.white,
+      onError: Colors.white,
+      primaryContainer: darkGreen,
+      secondaryContainer: woodBrown.withOpacity(0.7),
+      tertiaryContainer: saveRed.withOpacity(0.7),
     ),
-
-    // Text Button Theme for dark mode
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFFCEF03F),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        textStyle: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-    ),
-
-    // Icon Button Theme for dark mode
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: Colors.white,
-        minimumSize: const Size(48, 48),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    ),
-
-    // Input Decoration Theme for dark mode
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFF1E1E1E),
-      prefixIconColor: Colors.grey[400],
-      suffixIconColor: Colors.grey[400],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFCEF03F), width: 1),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 1),
-      ),
-      labelStyle: GoogleFonts.inter(
-        fontSize: 16,
-        color: Colors.grey[400],
-      ),
-      hintStyle: GoogleFonts.inter(
-        fontSize: 16,
-        color: Colors.grey[600],
-      ),
-      errorStyle: GoogleFonts.inter(
-        fontSize: 12,
-        color: Colors.red,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    ),
-
-    // Divider Theme for dark mode
-    dividerTheme: const DividerThemeData(
-      color: Color(0xFF2C2C2C),
-      thickness: 1,
-      space: 24,
-    ),
+    // Copy light theme structure and adjust colors accordingly
+    // Add dark theme specific customizations here
   );
 }

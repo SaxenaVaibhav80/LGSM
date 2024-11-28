@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +20,42 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> login(String email, String password) async {
+    const url =
+        'http://localhost:9000/api/login'; // Update with your backend URL
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful
+        final data = jsonDecode(response.body);
+        showSnackBar(
+            'Login successful: Welcome ${data['userId']}', Colors.green);
+        Navigator.pushNamed(context, '/home'); // Redirect to home or dashboard
+      } else {
+        // Login failed
+        final error = jsonDecode(response.body)['error'];
+        showSnackBar('Error: $error', Colors.red);
+      }
+    } catch (e) {
+      // Network or server error
+      showSnackBar('Network error: $e', Colors.red);
+    }
+  }
+
+  void showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
+    );
   }
 
   @override
@@ -127,7 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Handle login
+                      // Trigger login
+                      login(_emailController.text, _passwordController.text);
                     }
                   },
                   child: Row(
