@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -12,6 +14,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneController = TextEditingController(); // Added phone controller
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -22,7 +25,37 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> signup(
+      String name, String email, String password, String phone) async {
+    const url =
+        'http://localhost:9000/api/signup'; // Ensure your backend is running
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': name,
+        'email': email,
+        'password': password,
+        'phone': phone, // Include phone number in the request
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // If the signup is successful
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signup Successful!')),
+      );
+      Navigator.pop(context); // Redirect to login or previous page
+    } else {
+      // If there’s an error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${response.body}')),
+      );
+    }
   }
 
   @override
@@ -71,6 +104,26 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                // Phone field
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  style: theme.textTheme.bodyLarge,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (value.length != 10) {
+                      return 'Phone number must be 10 digits';
                     }
                     return null;
                   },
@@ -165,7 +218,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Handle sign up
+                      signup(
+                        _nameController.text,
+                        _emailController.text,
+                        _passwordController.text,
+                        _phoneController
+                            .text, // Pass phone number to the signup function
+                      );
                     }
                   },
                   child: Row(
