@@ -13,25 +13,26 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;       // taking port from env else default port 3000
 const secret_key = process.env.SECRET_KEY;
 
-// Middleware
+// --------------------------------------- cors-------------------------------------->
 app.use(cors({
-  origin: true, // Allow all origins in development
-  credentials: true // Allow credentials
+  origin: true, 
+  credentials: true
 }));
-app.use(express.json()); // For parsing application/json
-app.use(cookieParser()); // For parsing cookies
+app.use(express.json()); 
+app.use(cookieParser()); 
 app.use(express.urlencoded({ extended: true }));
 
-// Health check route
+
 app.get("/", (req, res) => {
   res.json({ status: "Server is running" });
 });
 
-// Signup route
-app.post("/user/api/signup", async (req, res) => {
+// -----------------------------user signup route---------------------------------->
+
+app.post("/api/user/signup", async (req, res) => {
   const { username, email, password, phone } = req.body;
 
   try {
@@ -119,7 +120,7 @@ async function getuuid()
 
 //------------------------ shopkeeper signup------------------------->
 
-app.post("/shopkeeper/api/signup", async (req, res) => {
+app.post("/api/shopkeeper/signup", async (req, res) => {
   const { ShopName, ShopkeeperName, email, address, phone, pincode, password } = req.body;
 
   try {
@@ -178,9 +179,9 @@ app.post("/shopkeeper/api/signup", async (req, res) => {
   }
 });
 
-// Login route------------------------------------------>
+//-----------------user login route------------------------------------------>
 
-app.post("/api/login", async (req, res) => {
+app.post("/api/user/login", async (req, res) => {
   const { email, password } = req.body;
   
   try {
@@ -233,6 +234,65 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+//----------------------- shopkeeper login router-------------------------->
+
+app.post("/api/shopkeeper/login", async (req, res) => {
+  const { shopid, password } = req.body;
+
+  try {
+   
+    const shopkeeper = await shopkeeperModel.findOne()
+      .populate({
+        path: 'shop',
+        match: { shopId: shopid } 
+      });
+
+    if (!shopkeeper) {
+      return res.status(404).json({
+        success: false,
+        message: "Shop ID not found"
+      });
+    }
+
+    const passverify = await bcrypt.compare(password, shopkeeper.password);
+    if (!passverify) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password"
+      });
+    }
+
+    const token = jwt.sign(
+      { id: shopkeeper._id, name: shopkeeper.ShopkeeperName },
+      secret_key,
+      { expiresIn: "24h" }
+    );
+
+    res.cookie('token', token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        token:token,
+        userId: shopkeeper._id,
+        name: shopkeeper.ShopkeeperName,
+        email: shopkeeper.email
+      }
+    });
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
 
 
 // Start server
