@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
 const shopkeeperModel = require("./models/shopkeeper.js")
+const ShopsModel = require("./models/shops.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -30,7 +31,7 @@ app.get("/", (req, res) => {
 });
 
 // Signup route
-app.post("/api/signup", async (req, res) => {
+app.post("/user/api/signup", async (req, res) => {
   const { username, email, password, phone } = req.body;
 
   try {
@@ -75,8 +76,110 @@ app.post("/api/signup", async (req, res) => {
     });
   }
 });
+// -----------------------generate uuid function ------------------------------------------->
 
-// Login route
+async function getuuid()
+{
+  const token = req.cookies.token
+  if(token)
+  {
+    try{
+
+      const verification = jwt.verify(token,secret_key)
+      const id = verification.id
+      const user = await shopkeeperModel.findOne({_id:id})
+      const shopname = user. ShopName
+      const pin = user.pincode
+      const existCode = await shopkeeperModel.find({pincode:pin})
+      const quantity = existCode.length
+      const last_id = user._id.toString().slice(-3);  // ye last ke 3 digit dega obj   _id ke 
+      const abbr = shopname.split(" ").map(word=>word[0]).join('')
+      const upperabbr= abbr.toUpperCase();
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+      }
+      
+      if(existCode)
+      {
+        const uid = `${pin}${last_id}${upperabbr}${quantity+1}`
+        return uid
+      }
+      else{
+        const uid = `${pin}${last_id}${upperabbr}${1}`
+        return uid
+      }
+
+    }catch(err)
+    {
+       res.status(409).json("malwared token")
+    }
+  }
+}
+
+//------------------------ shopkeeper signup------------------------->
+
+app.post("/shopkeeper/api/signup", async (req, res) => {
+  const { ShopName, ShopkeeperName, email, address, phone, pincode, password } = req.body;
+
+  try {
+    if (!(ShopName && ShopkeeperName && email && phone && pincode && password)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "All fields are required" 
+      });
+    }
+
+    const isExist = await shopkeeperModel.findOne({ email });
+    if (isExist) {
+      return res.status(409).json({ 
+        success: false,
+        message: "User already exists" 
+      });
+    }
+
+    const uuid = await getuuid()
+    const encPass = await bcrypt.hash(password, 10);
+
+    const shop = await ShopsModel.create({
+     shopId:uuid,
+     name:ShopName,
+     email:email,
+     phone:phone,
+     location:address
+    });
+    
+    const shopkeeper = await shopkeeperModel.create({
+      ShopName:ShopName,
+      ShopkeeperName:ShopkeeperName,
+      email:email,
+      address:address,
+      phone:phone,
+      pincode:pincode,
+      password: encPass,
+      shop: shop.shopId
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "shopkeeper and shop created successfully",
+      data: {
+        shopID:uuid,
+        shopkeeperID : shopkeeper._id
+      }
+    });
+
+  }catch (err) {
+    console.error("Signup Error:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
+  }
+});
+
+// Login route------------------------------------------>
+
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   
@@ -130,49 +233,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ---------------------------- Get uuid -------------------------->
-app.post("/api/getuid",async(req,res)=>
-{
-  const token = req.cookies.token
-  if(token)
-  {
-    try{
-
-      const verification = jwt.verify(token,secret_key)
-      const id = verification.id
-      const user = await shopkeeperModel.findOne({_id:id})
-      const shopname = user. ShopName
-      const pin = user.pincode
-      const existCode = await shopkeeperModel.find({pincode:pin})
-      const quantity = existCode.length
-      const last_id = user._id.toString().slice(-3);  // ye last ke 3 digit dega obj   _id ke 
-      const abbr = shopname.split(" ").map(word=>word[0]).join('')
-      const upperabbr= abbr.toUpperCase();
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      if(existCode)
-      {
-        const uid = `${pin}${last_id}${upperabbr}${quantity+1}`
-        res.status(200).json({
-          uid:uid
-        })
-      }
-      else{
-        const uid = `${pin}${last_id}${upperabbr}${1}`
-        res.status(200).json({
-          uid:uid
-        })
-      }
-
-    }catch(err)
-    {
-       res.send(409).json("malwared token")
-    }
-  }
-})
 
 
 // Start server
