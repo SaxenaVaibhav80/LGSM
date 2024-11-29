@@ -79,42 +79,28 @@ app.post("/api/user/signup", async (req, res) => {
 });
 // -----------------------generate uuid function ------------------------------------------->
 
-async function getuuid()
+async function getuuid(shopname,pincode)
 {
-  const token = req.cookies.token
-  if(token)
-  {
-    try{
 
-      const verification = jwt.verify(token,secret_key)
-      const id = verification.id
-      const user = await shopkeeperModel.findOne({_id:id})
-      const shopname = user. ShopName
-      const pin = user.pincode
-      const existCode = await shopkeeperModel.find({pincode:pin})
-      const quantity = existCode.length
-      const last_id = user._id.toString().slice(-3);  // ye last ke 3 digit dega obj   _id ke 
-      const abbr = shopname.split(" ").map(word=>word[0]).join('')
-      const upperabbr= abbr.toUpperCase();
+  const pin = pincode
+  const now = new Date();
+  const existCode = await shopkeeperModel.find({pincode:pin})
+  const quantity = existCode.length
+  const abbr = shopname.split(" ").map(word=>word[0]).join('')
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0'); 
+  const hours = String(now.getHours()).padStart(2, '0'); 
+  const upperabbr= abbr.toUpperCase()
 
-      if (!user) {
-        res.status(404).json({ message: "User not found" });
-      }
-      
-      if(existCode)
-      {
-        const uid = `${pin}${last_id}${upperabbr}${quantity+1}`
-        return uid
-      }
-      else{
-        const uid = `${pin}${last_id}${upperabbr}${1}`
-        return uid
-      }
 
-    }catch(err)
-    {
-       res.status(409).json("malwared token")
-    }
+  if(existCode.length > 0)
+  {  
+    const uid = `${pin}${upperabbr}${day}${month}${hours}_${quantity+1}`
+    return uid
+  }
+  else{
+    const uid = `${pin}${upperabbr}${day}${month}${hours}_1`
+    return uid
   }
 }
 
@@ -139,7 +125,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       });
     }
 
-    const uuid = await getuuid()
+    const uuid = await getuuid(ShopName,pincode)
     const encPass = await bcrypt.hash(password, 10);
 
     const shop = await ShopsModel.create({
@@ -165,8 +151,8 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       success: true,
       message: "shopkeeper and shop created successfully",
       data: {
-        shopID:uuid,
-        shopkeeperID : shopkeeper._id
+        shopID:shop.shopId,
+        shopkeeperID :shopkeeper._id
       }
     });
 
