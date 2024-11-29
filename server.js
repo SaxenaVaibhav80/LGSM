@@ -7,6 +7,7 @@ const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
 const shopkeeperModel = require("./models/shopkeeper.js")
 const cors = require("cors");
+const shopModel = require("./models/shops.js")
 const cookieParser = require("cookie-parser");
 
 dotenv.config();

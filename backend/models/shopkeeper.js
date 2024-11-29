@@ -40,4 +40,6 @@ const ShopkeeperSchema = new mongoose.Schema({
     
 });
 
-module.exports = mongoose.model("ShopKeeper", ShopkeeperSchema);
+const ShopKeeper = mongoose.model("ShopKeeper",  ShopkeeperSchema );
+
+module.exports =  ShopKeeper;
