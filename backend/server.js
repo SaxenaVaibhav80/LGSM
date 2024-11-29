@@ -87,19 +87,17 @@ async function getuuid(shopname,pincode)
   const existCode = await shopkeeperModel.find({pincode:pin})
   const quantity = existCode.length
   const abbr = shopname.split(" ").map(word=>word[0]).join('')
-  const day = String(now.getDate()).padStart(2, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0'); 
-  const hours = String(now.getHours()).padStart(2, '0'); 
+  const day = String(now.getDate()).padStart(2, '0');                         
   const upperabbr= abbr.toUpperCase()
 
 
   if(existCode.length > 0)
   {  
-    const uid = `${pin}${upperabbr}${day}${month}${hours}_${quantity+1}`
+    const uid = `${pin}${upperabbr}${day}_${quantity+1}`
     return uid
   }
   else{
-    const uid = `${pin}${upperabbr}${day}${month}${hours}_1`
+    const uid = `${pin}${upperabbr}${day}_1`
     return uid
   }
 }
