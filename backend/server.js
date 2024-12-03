@@ -149,8 +149,10 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       success: true,
       message: "shopkeeper and shop created successfully",
       data: {
-        shopID:shop.shopId,
-        shopkeeperID :shopkeeper._id
+        shopDetails: {
+          name: shop.name,
+          shopID:shop.shopId
+        },
       }
     });
 
