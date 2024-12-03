@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/screens/customer_login_screen.dart';
 import 'package:lsgm_app/screens/customer_signup_screen.dart';
+import 'package:lsgm_app/screens/shop_confirmation.dart';
 import 'package:lsgm_app/screens/shopkeeper_login_screen.dart';
 import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
 import '../screens/role_selection_screen.dart';
@@ -18,6 +19,7 @@ class AppRoutes {
   static const String customerSignup = '/signup';
   static const String shopkeeperSignup = '/shopkeeper/signup';
   static const String shopkeeperLogin = '/shopkeeper/login';
+  static const String shopConfirmation = '/shopkeeper/confirmation';
 
   // Customer routes
   static const String customerHome = '/customer/home';
@@ -39,6 +41,17 @@ class AppRoutes {
         customerSignup: (context) => const SignupScreen(),
         shopkeeperSignup: (context) => const ShopkeeperSignupScreen(),
         shopkeeperLogin: (context) => const ShopkeeperLoginScreen(),
+        shopConfirmation: (context) {
+          // Get the arguments passed during navigation
+          final args =
+              ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+
+          return ShopConfirmationScreen(
+            shopId: args['shopId'] ?? '',
+            shopName: args['shopName'] ?? '',
+            shopAddress: args['shopAddress'] ?? '',
+          );
+        },
         // Customer routes
         // customerHome: (context) => const CustomerHomeScreen(),
         // customerProfile: (context) => const CustomerProfileScreen(),
@@ -68,7 +81,14 @@ class AppRoutes {
       ),
     );
   }
-
+  static void navigateToAndReplaceWithArgs(
+      BuildContext context, String routeName, Map<String, dynamic> args) {
+    Navigator.pushReplacementNamed(
+      context,
+      routeName,
+      arguments: args,
+    );
+  }
   // Navigation methods
   static void navigateTo(BuildContext context, String routeName) {
     Navigator.pushNamed(context, routeName);

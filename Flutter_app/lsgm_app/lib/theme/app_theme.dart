@@ -11,6 +11,10 @@ class AppTheme {
   static const Color tileBg = Color(0xFFF5F5F5);
   static const Color lightGreen = Color(0xFFE8F5E9);
   static const Color darkGreen = Color(0xFF166B3A);
+  static const Color searchBarBg = Color(0xFFF5F5F5);
+  static const Color locationBarBg = Color(0xFF004D40);
+  static const Color locationTextColor = Color(0xFFFFF9C4);
+  static const Color categoryBgColor = Color(0xFFFFE0B2);
 
   // Light Theme
   static final ThemeData lightTheme = ThemeData(
@@ -33,6 +37,8 @@ class AppTheme {
       primaryContainer: lightGreen,
       secondaryContainer: Color(0xFFFFECB3),
       tertiaryContainer: Color(0xFFFFE5E5),
+      surfaceVariant: searchBarBg,
+      onSurfaceVariant: Colors.grey,
     ),
 
     // Text Theme
@@ -107,7 +113,7 @@ class AppTheme {
       toolbarHeight: 64,
     ),
 
-    // Bottom Navigation Bar Theme
+    // Navigation Bar Theme
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: marketGreen,
@@ -151,45 +157,16 @@ class AppTheme {
       ),
     ),
 
-    // Outlined Button Theme
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: marketGreen,
-        minimumSize: const Size(double.infinity, 56),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: marketGreen, width: 2),
-        ),
-        backgroundColor: Colors.white,
-        textStyle: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-    ),
-
-    // Text Button Theme
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: marketGreen,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        textStyle: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
+    // Icon Theme
+    iconTheme: const IconThemeData(
+      color: marketGreen,
+      size: 24,
     ),
 
     // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: searchBarBg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -197,68 +174,23 @@ class AppTheme {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: marketGreen, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
-      ),
-      labelStyle: GoogleFonts.inter(
-        fontSize: 16,
-        color: Colors.grey[600],
+        borderSide: const BorderSide(color: marketGreen, width: 1),
       ),
       hintStyle: GoogleFonts.inter(
         fontSize: 16,
-        color: Colors.grey[400],
-      ),
-      errorStyle: GoogleFonts.inter(
-        fontSize: 12,
-        color: Colors.red,
+        color: Colors.grey[600],
       ),
       prefixIconColor: Colors.grey[600],
       suffixIconColor: Colors.grey[600],
-      isDense: true,
-    ),
-
-    // Floating Action Button Theme
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: marketGreen,
-      foregroundColor: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      sizeConstraints: const BoxConstraints.tightFor(
-        width: 56,
-        height: 56,
-      ),
-    ),
-
-    // List Tile Theme
-    listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      iconColor: marketGreen,
-      tileColor: Colors.white,
-      selectedTileColor: lightGreen,
-      selectedColor: marketGreen,
-      minLeadingWidth: 24,
-      minVerticalPadding: 16,
     ),
 
     // Chip Theme
     chipTheme: ChipThemeData(
-      backgroundColor: lightGreen,
+      backgroundColor: categoryBgColor,
       disabledColor: Colors.grey[200]!,
       selectedColor: marketGreen,
       secondarySelectedColor: marketGreen,
@@ -282,82 +214,22 @@ class AppTheme {
       color: Color(0xFFE0E0E0),
       thickness: 1,
       space: 24,
-      indent: 16,
-      endIndent: 16,
     ),
 
-    // Icon Theme
-    iconTheme: const IconThemeData(
-      color: marketGreen,
-      size: 24,
-      opacity: 1.0,
-    ),
-
-    // Progress Indicator Theme
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: marketGreen,
-      linearTrackColor: lightGreen,
-      circularTrackColor: lightGreen,
-      refreshBackgroundColor: lightGreen,
-    ),
-
-    // Switch Theme
-    switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return marketGreen;
-        }
-        return Colors.grey;
-      }),
-      trackColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return marketGreen.withOpacity(0.5);
-        }
-        return Colors.grey.withOpacity(0.5);
-      }),
-      trackOutlineColor: MaterialStateProperty.resolveWith((states) {
-        return Colors.transparent;
-      }),
-    ),
-
-    // Checkbox Theme
-    checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return marketGreen;
-        }
-        return Colors.transparent;
-      }),
-      checkColor: MaterialStateProperty.all(Colors.white),
-      side: BorderSide(color: Colors.grey[400]!),
+    // List Tile Theme
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(12),
       ),
+      iconColor: marketGreen,
+      tileColor: Colors.white,
+      selectedTileColor: lightGreen,
+      selectedColor: marketGreen,
+      minVerticalPadding: 16,
     ),
 
-    // Radio Theme
-    radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
-          return marketGreen;
-        }
-        return Colors.grey[400];
-      }),
-    ),
-
-    // Slider Theme
-    sliderTheme: SliderThemeData(
-      activeTrackColor: marketGreen,
-      inactiveTrackColor: lightGreen,
-      thumbColor: marketGreen,
-      overlayColor: const Color(0x291E8B4D),
-      valueIndicatorColor: marketGreen,
-      trackHeight: 4,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
-    ),
-
-    // SnackBar Theme
+    // Snack Bar Theme
     snackBarTheme: SnackBarThemeData(
       backgroundColor: Colors.black87,
       contentTextStyle: GoogleFonts.inter(
@@ -370,33 +242,25 @@ class AppTheme {
       behavior: SnackBarBehavior.floating,
     ),
 
-    // Dialog Theme
-    dialogTheme: DialogTheme(
-      backgroundColor: Colors.white,
+    // Progress Indicator Theme
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: marketGreen,
+      linearTrackColor: lightGreen,
+      circularTrackColor: lightGreen,
+      refreshBackgroundColor: lightGreen,
+    ),
+
+    // Floating Action Button Theme
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: marketGreen,
+      foregroundColor: Colors.white,
+      elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      titleTextStyle: GoogleFonts.inter(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
-      contentTextStyle: GoogleFonts.inter(
-        fontSize: 16,
-        color: Colors.black87,
-      ),
-    ),
-
-    // Popup Menu Theme
-    popupMenuTheme: PopupMenuThemeData(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 4,
-      textStyle: GoogleFonts.inter(
-        fontSize: 14,
-        color: Colors.black87,
+      sizeConstraints: const BoxConstraints.tightFor(
+        width: 56,
+        height: 56,
       ),
     ),
   );
@@ -419,8 +283,25 @@ class AppTheme {
       primaryContainer: darkGreen,
       secondaryContainer: woodBrown.withOpacity(0.7),
       tertiaryContainer: saveRed.withOpacity(0.7),
+      surfaceVariant: Colors.grey[800]!,
+      onSurfaceVariant: Colors.grey[300]!,
     ),
-    // Copy light theme structure and adjust colors accordingly
-    // Add dark theme specific customizations here
+    // Copy light theme structure and adjust colors for dark mode
+    textTheme: TextTheme(
+      displayLarge: GoogleFonts.inter(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        letterSpacing: -0.5,
+      ),
+      displayMedium: GoogleFonts.inter(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        letterSpacing: -0.5,
+      ),
+      // Add other text styles similarly adjusted for dark mode
+    ),
+    // You can add more dark theme specific customizations here
   );
 }

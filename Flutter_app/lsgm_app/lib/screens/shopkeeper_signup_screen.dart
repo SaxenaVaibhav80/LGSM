@@ -1,7 +1,11 @@
 // lib/screens/auth/shopkeeper_signup_screen.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:lsgm_app/routes/navigation.dart';
 
 class ShopkeeperSignupScreen extends StatefulWidget {
   const ShopkeeperSignupScreen({super.key});
@@ -35,6 +39,53 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> signupShop(String shopName, String ownerName, String email,
+      String password, String phone, String address, String pinCode) async {
+    try {
+      const url = 'http://localhost:9000/api/signup-shop';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'shopName': shopName,
+          'ownerName': ownerName,
+          'email': email,
+          'password': password,
+          'phone': phone,
+          'address': address,
+          'pinCode': pinCode,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        // Navigate to confirmation screen with shop details
+        if (!context.mounted) return;
+
+        AppRoutes.navigateToAndReplaceWithArgs(
+          context,
+          AppRoutes.shopConfirmation,
+          {
+            'shopId': data['shopId'] ?? '', // Assuming your API returns shopId
+            'shopName': data['shopName'] ?? shopName,
+            'shopAddress': "$address, $pinCode",
+          },
+        );
+      } else {
+        if (!context.mounted) return;
+        final error = jsonDecode(response.body)['error'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: Could not connect to server')),
+      );
+    }
   }
 
   @override
@@ -272,9 +323,43 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
 
                 // Sign Up Button
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Handle sign up logic
+                      try {
+                        // Show loading indicator
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                        );
+
+                        await signupShop(
+                          _shopNameController.text,
+                          _nameController.text,
+                          _emailController.text,
+                          _passwordController.text,
+                          _phoneController.text,
+                          _shopAddressController.text,
+                          _pinCodeController.text,
+                        );
+
+                        // Close loading indicator
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        // Close loading indicator if error occurs
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: ${e.toString()}')),
+                          );
+                        }
+                      }
                     }
                   },
                   child: const Text('CREATE ACCOUNT'),

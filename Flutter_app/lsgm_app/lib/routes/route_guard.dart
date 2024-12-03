@@ -17,6 +17,7 @@ class RouteGuard {
     AppRoutes.customerSignup,
     AppRoutes.customerSignup,
     AppRoutes.shopkeeperSignup,
+    AppRoutes.shopConfirmation,
   ];
 
   // Customer-specific routes
