@@ -93,11 +93,11 @@ async function getuuid(shopname,pincode)
 
   if(existCode.length > 0)
   {  
-    const uid = `${pin}${upperabbr}${day}_${quantity+1}`
+    const uid = `${pin}${upperabbr}${day}${quantity+1}`
     return uid
   }
   else{
-    const uid = `${pin}${upperabbr}${day}_1`
+    const uid = `${pin}${upperabbr}${day}1`
     return uid
   }
 }
@@ -149,10 +149,8 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       success: true,
       message: "shopkeeper and shop created successfully",
       data: {
-        shopDetails: {
-          name: shop.name,
-          shopID:shop.shopId
-        },
+        name: shop.name,
+        shopID:shop._id
       }
     });
 
