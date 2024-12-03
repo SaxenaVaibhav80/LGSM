@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:lsgm_app/routes/navigation.dart';
+import 'package:lsgm_app/screens/shop_confirmation.dart';
 
 class ShopkeeperSignupScreen extends StatefulWidget {
   const ShopkeeperSignupScreen({super.key});
@@ -49,30 +50,30 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'shopName': shopName,
-          'ownerName': ownerName,
+          'ShopName': shopName,
+          'ShopkeeperName': ownerName,
           'email': email,
-          'password': password,
           'phone': phone,
           'address': address,
-          'pinCode': pinCode,
+          'pincode': pinCode,
+          'password': password,
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print(data);
         // Navigate to confirmation screen with shop details
         if (!context.mounted) return;
 
-        AppRoutes.navigateToAndReplaceWithArgs(
-          context,
-          AppRoutes.shopConfirmation,
-          {
-            'shopId': data['shopID'] ?? '', // Assuming your API returns shopId
-            'shopName': data['name'] ?? shopName,
-            'shopAddress': "$address, $pinCode",
-          },
-        );
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ShopConfirmationScreen(
+                      shopAddress: "$address $pinCode",
+                      shopId: data['shopID'],
+                      shopName: data['name'],
+                    )));
       } else {
         if (!context.mounted) return;
         final error = jsonDecode(response.body)['error'];

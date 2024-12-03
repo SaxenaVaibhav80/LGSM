@@ -47,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200 || response.statusCode==201) {
       // If the signup is successful
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Signup Successful!')),

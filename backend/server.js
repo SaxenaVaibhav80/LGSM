@@ -93,11 +93,11 @@ async function getuuid(shopname,pincode)
 
   if(existCode.length > 0)
   {  
-    const uid = `${pin}${upperabbr}${day}_${quantity+1}`
+    const uid = `${pin}${upperabbr}${day}${quantity+1}`
     return uid
   }
   else{
-    const uid = `${pin}${upperabbr}${day}_1`
+    const uid = `${pin}${upperabbr}${day}1`
     return uid
   }
 }
@@ -106,6 +106,8 @@ async function getuuid(shopname,pincode)
 
 app.post("/api/shopkeeper/signup", async (req, res) => {
   const { ShopName, ShopkeeperName, email, address, phone, pincode, password } = req.body;
+
+  console.log(ShopName,pincode)
 
   try {
     if (!(ShopName && ShopkeeperName && email && phone && pincode && password)) {
@@ -142,7 +144,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       phone:phone,
       pincode:pincode,
       password: encPass,
-      shop: shop.shopId
+      shop: shop._id
     });
 
     res.status(200).json({
