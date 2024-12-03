@@ -1,8 +1,6 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -37,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> signup(
       String name, String email, String password, String phone) async {
     const url =
-        'http://localhost:9000/api/signup'; // Ensure your backend is running
+        'http://localhost:9000/api/user/signup'; // Ensure your backend is running
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -61,7 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text('Error: ${response.body}')),
       );
     }
- 
+
     super.dispose();
   }
 
@@ -234,7 +232,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         _phoneController
                             .text, // Pass phone number to the signup function
                       );
-
                     }
                   },
                   child: Row(
