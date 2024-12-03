@@ -44,7 +44,7 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
   Future<void> signupShop(String shopName, String ownerName, String email,
       String password, String phone, String address, String pinCode) async {
     try {
-      const url = 'http://localhost:9000/api/signup-shop';
+      const url = 'http://localhost:9000/api/shopkeeper/signup';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -68,8 +68,8 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
           context,
           AppRoutes.shopConfirmation,
           {
-            'shopId': data['shopId'] ?? '', // Assuming your API returns shopId
-            'shopName': data['shopName'] ?? shopName,
+            'shopId': data['shopID'] ?? '', // Assuming your API returns shopId
+            'shopName': data['name'] ?? shopName,
             'shopAddress': "$address, $pinCode",
           },
         );

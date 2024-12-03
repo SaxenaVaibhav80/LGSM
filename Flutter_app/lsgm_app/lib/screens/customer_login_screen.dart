@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login(String email, String password) async {
     const url =
-        'http://localhost:9000/api/login'; // Update with your backend URL
+        'http://localhost:9000/api/user/login'; // Update with your backend URL
     try {
       final response = await http.post(
         Uri.parse(url),
