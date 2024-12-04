@@ -94,11 +94,11 @@ async function getuuid(shopname,pincode)
 
   if(existCode.length > 0)
   {  
-    const uid = `${pin}${upperabbr}${day}$_{quantity+1}`
+    const uid = `${pin}${upperabbr}${day}_${quantity+1}`
     return uid
   }
   else{
-    const uid = `${pin}${upperabbr}$_{day}1`
+    const uid = `${pin}${upperabbr}_${day}1`
     return uid
   }
 }
