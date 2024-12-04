@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
 const shopkeeperModel = require("./models/shopkeeper.js")
+const InventoryModel = require("./models/inventory.js")
 const ShopsModel = require("./models/shops.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
