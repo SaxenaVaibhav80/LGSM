@@ -108,6 +108,8 @@ async function getuuid(shopname,pincode)
 app.post("/api/shopkeeper/signup", async (req, res) => {
   const { ShopName, ShopkeeperName, email, address, phone, pincode, password } = req.body;
 
+  console.log(ShopName,pincode)
+
   try {
     if (!(ShopName && ShopkeeperName && email && phone && pincode && password)) {
       return res.status(400).json({ 
@@ -143,7 +145,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       phone:phone,
       pincode:pincode,
       password: encPass,
-      shop: shop.shopId
+      shop: shop._id
     });
 
     res.status(200).json({

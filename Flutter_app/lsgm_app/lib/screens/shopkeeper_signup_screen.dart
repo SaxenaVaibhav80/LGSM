@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:lsgm_app/routes/navigation.dart';
+import 'package:lsgm_app/screens/shop_confirmation.dart';
 
 class ShopkeeperSignupScreen extends StatefulWidget {
   const ShopkeeperSignupScreen({super.key});
@@ -49,41 +49,56 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'shopName': shopName,
-          'ownerName': ownerName,
+          'ShopName': shopName,
+          'ShopkeeperName': ownerName,
           'email': email,
           'password': password,
           'phone': phone,
           'address': address,
-          'pinCode': pinCode,
+          'pincode': pinCode,
         }),
       );
 
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        // Navigate to confirmation screen with shop details
-        if (!context.mounted) return;
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('Response data: $responseData'); // Debug print
 
-        AppRoutes.navigateToAndReplaceWithArgs(
-          context,
-          AppRoutes.shopConfirmation,
-          {
-            'shopId': data['shopID'] ?? '', // Assuming your API returns shopId
-            'shopName': data['name'] ?? shopName,
-            'shopAddress': "$address, $pinCode",
-          },
-        );
+        if (responseData['success'] == true && responseData['data'] != null) {
+          final shopData = responseData['data'];
+
+          if (!context.mounted) return;
+
+          print(shopData['shopID']);
+          print(shopData['name']);
+          String shopUID = shopData['shopID'];
+          print('Starting signup process...');
+          try {
+            print('Navigation started...');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => ShopConfirmationScreen(
+                  shopId: shopUID,
+                  shopName: _shopNameController.toString(),
+                  shopAddress: "$address, $pinCode",
+                ),
+              ),
+            );
+            print('Navigation completed.');
+          } catch (e) {
+            print('Error during navigation: $e');
+          }
+        } else {
+          throw 'Invalid response format';
+        }
       } else {
-        if (!context.mounted) return;
-        final error = jsonDecode(response.body)['error'];
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error')),
-        );
+        final errorData = jsonDecode(response.body);
+        throw errorData['message'] ?? 'Unknown error occurred';
       }
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Could not connect to server')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }

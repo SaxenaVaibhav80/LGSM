@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/routes/navigation.dart';
+import 'package:lsgm_app/screens/customer_login_screen.dart';
+import 'package:lsgm_app/screens/shopkeeper_login_screen.dart';
 import 'package:lsgm_app/theme/app_theme.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
@@ -71,8 +73,10 @@ class RoleSelectionScreen extends StatelessWidget {
                       TextButton.icon(
                         onPressed: () {
                           // Navigate to shopkeeper flow
-                          AppRoutes.navigateTo(
-                              context, AppRoutes.shopkeeperLogin);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => ShopkeeperLoginScreen()));
                         },
                         icon: const Icon(Icons.store, size: 24),
                         label: const Text('Continue as Shopkeeper'),
@@ -81,7 +85,10 @@ class RoleSelectionScreen extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: () {
                           // Navigate to customer flow
-                          Navigator.pushNamed(context, '/customer/login');
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => LoginScreen()));
                         },
                         icon: const Icon(Icons.person, size: 24),
                         label: const Text('Continue as Customer'),
