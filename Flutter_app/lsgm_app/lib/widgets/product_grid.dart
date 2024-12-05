@@ -1,7 +1,5 @@
-// lib/widgets/product_grid.dart
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/models/prodducts.dart';
-
 
 class ProductGrid extends StatelessWidget {
   final String shopId;
@@ -13,33 +11,90 @@ class ProductGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: const EdgeInsets.all(16),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 0.8,
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth > 600 ? 220.0 : 160.0;
+    // Reduced card height to prevent overflow
+    final cardHeight = screenWidth > 600 ? 250.0 : 216.0;
+    final cardPadding = screenWidth > 600 ? 16.0 : 12.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min, // Added to prevent expansion
       children: [
-        // Example products - replace with actual data from your backend
-        _buildProductCard(
-          context,
-          Product(
-            id: '1',
-            name: 'Beetroot',
-            weight: '500 gm',
-            price: 17.29,
-            imagePath: 'assets/images/beetroot.png',
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: cardPadding,
+            vertical: cardPadding / 2,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Popular Products',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('See All'),
+              ),
+            ],
           ),
         ),
-        // Add more products...
+        SizedBox(
+          height: cardHeight,
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: cardPadding),
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final product = Product(
+                id: '1',
+                name: 'Beetroot',
+                weight: '500 gm',
+                price: 17.29,
+                imagePath: '/api/placeholder/400/300',
+              );
+              return Container(
+                width: cardWidth,
+                margin: EdgeInsets.only(right: cardPadding),
+                child: _buildProductCard(
+                  context,
+                  product,
+                  screenWidth,
+                  cardHeight,
+                ),
+              );
+            },
+            itemCount: 10,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Product product) {
+  Widget _buildProductCard(
+    BuildContext context,
+    Product product,
+    double screenWidth,
+    double cardHeight,
+  ) {
     final theme = Theme.of(context);
+    final isTabletOrLarger = screenWidth > 600;
+
+    // Adjusted sizes
+    final titleFontSize = isTabletOrLarger ? 16.0 : 13.0;
+    final weightFontSize = isTabletOrLarger ? 14.0 : 11.0;
+    final priceFontSize = isTabletOrLarger ? 16.0 : 13.0;
+    final iconSize = isTabletOrLarger ? 22.0 : 18.0;
+    final cardPadding = isTabletOrLarger ? 12.0 : 8.0;
+
+    // Adjusted content heights
+    final imageHeight = cardHeight * 0.48;
+    final contentHeight = cardHeight * 0.48;
 
     return Container(
+      height: cardHeight,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -52,58 +107,82 @@ class ProductGrid extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Center(
-              child: Image.asset(
+          SizedBox(
+            height: imageHeight,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+              child: Image.network(
                 product.imagePath,
                 fit: BoxFit.cover,
+                width: double.infinity,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  product.weight,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+          SizedBox(
+            height: contentHeight,
+            child: Padding(
+              padding: EdgeInsets.all(cardPadding),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        product.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: titleFontSize,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
+                      SizedBox(height: cardPadding / 4),
+                      Text(
+                        product.weight,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: weightFontSize,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: priceFontSize,
+                        ),
+                      ),
+                      Material(
                         color: theme.colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: EdgeInsets.all(cardPadding / 2),
+                            child: Icon(
+                              Icons.add,
+                              size: iconSize,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
                       ),
-                      child: Icon(
-                        Icons.add,
-                        size: 20,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

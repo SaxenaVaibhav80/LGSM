@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:lsgm_app/widgets/shop_header_info.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/shop_selection.dart';
 import '../widgets/product_grid.dart';
 import '../models/shops.dart';
 import '../models/user.dart';
+import '../models/prodducts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +26,38 @@ class _HomeScreenState extends State<HomeScreen> {
     email: 'john.doe@example.com',
   );
 
+  // Dummy carousel data
+  final List<Product> carouselProducts = [
+    Product(
+      id: '1',
+      name: 'Fresh Organic Carrots',
+      weight: '500 gm',
+      price: 2.99,
+      imagePath: '/api/placeholder/400/300',
+    ),
+    Product(
+      id: '2',
+      name: 'Red Bell Peppers',
+      weight: '250 gm',
+      price: 1.99,
+      imagePath: '/api/placeholder/400/300',
+    ),
+    Product(
+      id: '3',
+      name: 'Ripe Tomatoes',
+      weight: '1 kg',
+      price: 3.49,
+      imagePath: '/api/placeholder/400/300',
+    ),
+    Product(
+      id: '4',
+      name: 'Green Spinach',
+      weight: '200 gm',
+      price: 1.49,
+      imagePath: '/api/placeholder/400/300',
+    ),
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -36,6 +69,75 @@ class _HomeScreenState extends State<HomeScreen> {
       isShopSelected = true;
       selectedShop = shop;
     });
+  }
+
+  Widget _buildCarousel(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'New Arrivals',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  'See All',
+                  style: TextStyle(color: theme.colorScheme.primary),
+                ),
+              ),
+            ],
+          ),
+        ),
+        CarouselSlider.builder(
+          options: CarouselOptions(
+            height: 200,
+            viewportFraction: 0.8,
+            enlargeCenterPage: true,
+            scrollDirection: Axis.horizontal,
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 3),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            autoPlayCurve: Curves.fastOutSlowIn,
+          ),
+          itemCount: carouselProducts.length,
+          itemBuilder: (context, index, realIndex) {
+            final product = carouselProducts[index];
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.shadowColor.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.network(
+                  product.imagePath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   void _showProfileOptions(BuildContext context) {
@@ -207,7 +309,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Shop Info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,8 +328,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-
-                    // Change Shop Button
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       child: IconButton(
@@ -245,8 +344,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-
-                    // Profile Button
                     IconButton(
                       onPressed: () => _showProfileOptions(context),
                       icon: const Icon(Icons.person_outline),
@@ -261,6 +358,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+              ),
+              _buildCarousel(context),
+              const SizedBox(
+                height: 15,
               ),
               Expanded(
                 child: ProductGrid(shopId: selectedShop!.id),
