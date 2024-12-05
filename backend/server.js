@@ -164,6 +164,68 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
   }
 });
 
+//-----sending catagories ----------->
+
+app.get('/categories', (req, res) => {
+  const categories = [
+
+      {
+          name: "Groceries",
+          image_url: "https://media.istockphoto.com/id/1248691232/vector/set-of-packs-of-cereals-grains-nuts-on-shelf-for-kitchen-storage.jpg?s=612x612&w=0&k=20&c=LV9HUtSoSrYG-gSPW7A6Bpo6IiuwHhQfrwumd1SacvQ="
+      },
+      {
+          name: "Fruits and Vegetables",
+          image_url: "https://cdn-icons-png.flaticon.com/512/3362/3362707.png"
+      },
+      {
+          name: "Dairy",
+          image_url: "https://static.vecteezy.com/system/resources/previews/027/276/924/non_2x/dairy-products-icon-in-illustration-vector.jpg"
+      },
+      {
+          name: "Snacks",
+          image_url: "https://img.freepik.com/premium-vector/food-snack-illustration-vector-eat-set-icon-isolated-sweet-dessert-drink-chocolate-candy_1013341-5743.jpg"
+      },
+      {
+          name: "Beverages",
+          image_url: "https://cdn-icons-png.freepik.com/256/2405/2405451.png?semt=ais_hybrid"
+      },
+      {
+          name: "Household",
+          image_url: "https://cdn-icons-png.flaticon.com/256/11512/11512671.png"
+      },
+      {
+          name: "Personal Care",
+          image_url: "https://cdn-icons-png.flaticon.com/512/3901/3901586.png"
+      },
+      {
+          name: "Baby Care",
+          image_url: "https://st2.depositphotos.com/47577860/45962/v/450/depositphotos_459622354-stock-illustration-baby-care-dream-icon.jpg"
+      },
+      {
+          name: "Health and Wellness",
+          image_url: "https://cdn-icons-png.flaticon.com/512/4480/4480318.png"
+      },
+      {
+          name: "Home and Kitchen",
+          image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYXHxpUc7lb0Oi9gD3Q7J0kKHsSxoq3RoBlQ&s"
+      },
+      {
+          name: "Pet Care",
+          image_url: "https://cdn-icons-png.flaticon.com/512/2138/2138440.png"
+      },
+      {
+          name: "Stationary and Books",
+          image_url: "https://static.vecteezy.com/system/resources/previews/014/367/543/non_2x/stationary-book-calculator-pen-business-flat-line-filled-icon-banner-template-free-vector.jpg"
+      },
+      {
+          name: "Festival and Seasonal",
+          image_url: "https://img.freepik.com/premium-vector/diwali-festive-offer-background-design-template_649214-869.jpg"
+      }
+  ];
+
+    res.json({ success: true, data: categories });
+});
+
 //-----------------user login route------------------------------------------>
 
 app.post("/api/user/login", async (req, res) => {
