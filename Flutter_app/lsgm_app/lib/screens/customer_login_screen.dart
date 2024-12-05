@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lsgm_app/routes/navigation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -195,6 +196,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text('Sign up'),
                     ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.roleSelection,
+                    ),
+                    icon: const Icon(Icons.arrow_back, size: 16),
+                    label: const Text('Change Role'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
               ],
             ),

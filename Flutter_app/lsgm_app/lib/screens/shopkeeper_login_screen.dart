@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/routes/navigation.dart';
 import 'package:lsgm_app/routes/route_guard.dart';
-
+import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
 
 class ShopkeeperLoginScreen extends StatefulWidget {
   const ShopkeeperLoginScreen({super.key});
@@ -182,10 +182,12 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
                       style: theme.textTheme.bodyMedium,
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.shopkeeperSignup,
-                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (ctx) => ShopkeeperSignupScreen()));
+                      },
                       child: const Text('Register Now'),
                     ),
                   ],

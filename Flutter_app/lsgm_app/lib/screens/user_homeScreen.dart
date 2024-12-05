@@ -1,10 +1,187 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:lsgm_app/screens/product_detail.dart';
-import 'package:lsgm_app/theme/app_theme.dart';
+import 'package:lsgm_app/widgets/shop_header_info.dart';
+import '../widgets/bottom_nav.dart';
+import '../widgets/shop_selection.dart';
+import '../widgets/product_grid.dart';
+import '../models/shops.dart';
+import '../models/user.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool isShopSelected = false;
+  Shop? selectedShop;
+  int _selectedIndex = 0;
+
+  // Dummy user - Replace with actual user data
+  final user = User(
+    id: 'USER123',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+  );
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _onShopSelected(Shop shop) {
+    setState(() {
+      isShopSelected = true;
+      selectedShop = shop;
+    });
+  }
+
+  void _showProfileOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Text(
+                user.name[0].toUpperCase(),
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              user.name,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              user.email,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            _buildProfileOption(
+              context,
+              Icons.person_outline,
+              'View Profile',
+              () {
+                Navigator.pop(context);
+                // Navigate to profile screen
+              },
+            ),
+            _buildProfileOption(
+              context,
+              Icons.settings_outlined,
+              'Settings',
+              () {
+                Navigator.pop(context);
+                // Navigate to settings
+              },
+            ),
+            _buildProfileOption(
+              context,
+              Icons.logout,
+              'Logout',
+              () {
+                Navigator.pop(context);
+                // Handle logout
+              },
+              isDestructive: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileOption(
+    BuildContext context,
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(
+        icon,
+        color:
+            isDestructive ? theme.colorScheme.error : theme.colorScheme.primary,
+      ),
+      title: Text(
+        label,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: isDestructive ? theme.colorScheme.error : null,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  void _showShopChangeDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Change Shop',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: ShopSelectionScreen(
+                onShopSelected: (Shop shop) {
+                  _onShopSelected(shop);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,322 +193,88 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search and Cart Header
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
+            if (isShopSelected && selectedShop != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.05),
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Shop Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.search,
-                              color: theme.colorScheme.onSurfaceVariant),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Search for "Grocery"',
-                                border: InputBorder.none,
-                                hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant),
-                              ),
+                          Text(
+                            selectedShop!.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'ID: ${selectedShop!.id}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(Icons.shopping_cart_outlined,
-                        color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
 
-            // Location Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: AppTheme.locationBarBg,
-              child: Row(
-                children: [
-                  Text(
-                    'Current Location',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white70,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Row(
-                    children: [
-                      Text(
-                        'California, USA',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.locationTextColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: AppTheme.locationTextColor,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Categories
-            SizedBox(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildCategory(
-                      context, 'Cleaners', 'assets/icons/cleaners.png'),
-                  _buildCategory(context, 'Sweets', 'assets/icons/sweets.png'),
-                  _buildCategory(context, 'Dairy', 'assets/icons/dairy.png'),
-                  _buildCategory(context, 'Bakery', 'assets/icons/bakery.png'),
-                ],
-              ),
-            ),
-
-            // You might need section
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'You might need',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'See more',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.tertiary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Product Grid
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                padding: const EdgeInsets.all(16),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.8,
-                children: [
-                  _buildProductCard(
-                    context,
-                    'Beetroot',
-                    '500 gm',
-                    17.29,
-                    'Local shop',
-                    'assets/images/beetroot.png',
-                  ),
-                  _buildProductCard(
-                    context,
-                    'Italian Avocado',
-                    '400 gm',
-                    14.29,
-                    'Local shop',
-                    'assets/images/avocado.png',
-                  ),
-                  _buildProductCard(
-                    context,
-                    'Deshi Gajor',
-                    '1000 gm',
-                    27.29,
-                    'Local Carrot',
-                    'assets/images/carrot.png',
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom Navigation
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavItem(context, Icons.home, true),
-                  _buildNavItem(context, Icons.list, false),
-                  _buildNavItem(context, Icons.favorite_border, false),
-                  _buildNavItem(context, Icons.shopping_bag_outlined, false),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategory(BuildContext context, String title, String iconPath) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.categoryBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Image.asset(
-              iconPath,
-              width: 24,
-              height: 24,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductCard(BuildContext context, String name, String weight,
-      double price, String shop, String imagePath) {
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              productName: name,
-              price: price,
-              weight: weight,
-              imagePath: imagePath,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '($shop)',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    weight,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$${price.toStringAsFixed(2)}',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          size: 20,
+                    // Change Shop Button
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      child: IconButton(
+                        onPressed: () => _showShopChangeDialog(context),
+                        icon: Icon(
+                          Icons.store_outlined,
                           color: theme.colorScheme.primary,
                         ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+
+                    // Profile Button
+                    IconButton(
+                      onPressed: () => _showProfileOptions(context),
+                      icon: const Icon(Icons.person_outline),
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        foregroundColor: theme.colorScheme.primary,
+                        padding: const EdgeInsets.all(12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              Expanded(
+                child: ProductGrid(shopId: selectedShop!.id),
+              ),
+            ] else ...[
+              ShopSelectionScreen(onShopSelected: _onShopSelected),
+            ],
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, IconData icon, bool isSelected) {
-    final theme = Theme.of(context);
-    return Icon(
-      icon,
-      color: isSelected
-          ? theme.colorScheme.primary
-          : theme.colorScheme.onSurfaceVariant,
+      bottomNavigationBar: CustomBottomNav(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 }
