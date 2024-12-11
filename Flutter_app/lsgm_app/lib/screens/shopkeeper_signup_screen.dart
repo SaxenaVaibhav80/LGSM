@@ -63,33 +63,43 @@ class _ShopkeeperSignupScreenState extends State<ShopkeeperSignupScreen> {
         final responseData = jsonDecode(response.body);
         print('Response data: $responseData'); // Debug print
 
-        if (responseData['success'] == true && responseData['data'] != null) {
-          final shopData = responseData['data'];
+        try {
+          if (responseData['success'] == true && responseData['data'] != null) {
+            final shopData = responseData['data'];
 
-          if (!context.mounted) return;
+            if (!context.mounted) return;
 
-          print(shopData['shopID']);
-          print(shopData['name']);
-          String shopUID = shopData['shopID'];
-          print('Starting signup process...');
-          try {
-            print('Navigation started...');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (ctx) => ShopConfirmationScreen(
-                  shopId: shopUID,
-                  shopName: _shopNameController.toString(),
-                  shopAddress: "$address, $pinCode",
-                ),
-              ),
-            );
-            print('Navigation completed.');
-          } catch (e) {
-            print('Error during navigation: $e');
+            print(shopData['shopID']);
+            print(shopData['name']);
+            String shopUID = shopData['shopID'];
+            print('Starting signup process...');
+            try {
+              print('Navigation started...');
+
+              // Use addPostFrameCallback to ensure navigation happens after build phase
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (ctx) => ShopConfirmationScreen(
+                          shopId: shopUID,
+                          shopName: shopName,
+                          shopAddress: "$address $pinCode")),
+                );
+              });
+
+              print('Navigation completed.');
+            } catch (e) {
+              print('Error during navigation: $e');
+            }
+          } else {
+            throw 'Invalid response format';
           }
-        } else {
-          throw 'Invalid response format';
+        } catch (e) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.toString()}')),
+          );
         }
       } else {
         final errorData = jsonDecode(response.body);

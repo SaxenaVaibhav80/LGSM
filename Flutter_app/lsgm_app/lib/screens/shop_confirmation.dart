@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lsgm_app/screens/shopkeeper_login_screen.dart';
 import '../routes/navigation.dart';
 
 class ShopConfirmationScreen extends StatelessWidget {
@@ -133,10 +134,10 @@ class ShopConfirmationScreen extends StatelessWidget {
               // Continue Button
               ElevatedButton(
                 onPressed: () {
-                  AppRoutes.navigateToAndClear(
-                    context,
-                    AppRoutes.shopkeeperHome,
-                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ShopkeeperLoginScreen()));
                 },
                 child: const Text('CONTINUE TO DASHBOARD'),
               ),

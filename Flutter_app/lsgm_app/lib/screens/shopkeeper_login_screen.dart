@@ -1,8 +1,11 @@
 // lib/screens/auth/shopkeeper_login_screen.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:lsgm_app/routes/navigation.dart';
-import 'package:lsgm_app/routes/route_guard.dart';
+import 'package:lsgm_app/screens/shopkeeper_homeScreen.dart';
 import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
 
 class ShopkeeperLoginScreen extends StatefulWidget {
@@ -17,6 +20,8 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
   final _shopIdController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void dispose() {
@@ -25,11 +30,62 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      // Here you would typically handle the login logic
-      // For now, we'll just simulate a successful login
-      RouteGuard.handleSuccessfulAuth(context, 'shopkeeper');
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:9000/api/shopkeeper/login'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'shopid': _shopIdController.text, // matches server's expected field
+            'password': _passwordController.text,
+          }),
+        );
+
+        final responseData = json.decode(response.body);
+
+        if (response.statusCode == 200 && responseData['success']) {
+          // Store the token (you might want to use secure storage)
+          final token = responseData['data']['token'];
+
+          if (!mounted) return;
+
+          // Navigate to dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ShopkeeperDashboard(
+                shopkeeperName: responseData['data']['name'],
+                hasInventory:
+                    false, // You might want to add this to your server response
+              ),
+            ),
+          );
+        } else {
+          setState(() {
+            _errorMessage =
+                responseData['message'] ?? 'Login failed. Please try again.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage =
+              'Connection error. Please check your internet connection.';
+        });
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
 
@@ -158,7 +214,9 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
 
                 // Login Button
                 ElevatedButton(
-                  onPressed: _handleLogin,
+                  onPressed: () async {
+                    _handleLogin();
+                  },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

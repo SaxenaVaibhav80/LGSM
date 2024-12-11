@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:lsgm_app/models/category.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/shop_selection.dart';
 import '../widgets/product_grid.dart';
@@ -285,6 +286,113 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  final List<Category> categories = [
+    Category(
+      name: 'Fruits',
+      imagePath: '/api/placeholder/200/200',
+    ),
+    Category(
+      name: 'Vegetables',
+      imagePath: '/api/placeholder/200/200',
+    ),
+    Category(
+      name: 'Dairy',
+      imagePath: '/api/placeholder/200/200',
+    ),
+    Category(
+      name: 'Bakery',
+      imagePath: '/api/placeholder/200/200',
+    ),
+    Category(
+      name: 'Beverages',
+      imagePath: '/api/placeholder/200/200',
+    ),
+  ];
+
+// Create a new widget for the category section
+  Widget _buildCategorySection(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate responsive sizes
+    final double circleSize = screenWidth * 0.18; // 18% of screen width
+    final double fontSize = screenWidth * 0.03; // 3% of screen width
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Categories',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  'See All',
+                  style: TextStyle(color: theme.colorScheme.primary),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: circleSize + 40, // Height for circle + text
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Container(
+                margin: const EdgeInsets.only(right: 16),
+                child: Column(
+                  children: [
+                    Container(
+                      width: circleSize,
+                      height: circleSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.primaryContainer,
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.shadowColor.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.network(
+                          category.imagePath,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      category.name,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -292,85 +400,95 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isShopSelected && selectedShop != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.shadowColor.withOpacity(0.05),
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        child: (isShopSelected && selectedShop != null)
+            ? CustomScrollView(
+                slivers: [
+                  // Fixed Header
+                  SliverToBoxAdapter(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.shadowColor.withOpacity(0.05),
+                            blurRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            selectedShop!.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  selectedShop!.name,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'ID: ${selectedShop!.id}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            'ID: ${selectedShop!.id}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            child: IconButton(
+                              onPressed: () => _showShopChangeDialog(context),
+                              icon: Icon(
+                                Icons.store_outlined,
+                                color: theme.colorScheme.primary,
+                              ),
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.primaryContainer,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => _showProfileOptions(context),
+                            icon: const Icon(Icons.person_outline),
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              foregroundColor: theme.colorScheme.primary,
+                              padding: const EdgeInsets.all(12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      child: IconButton(
-                        onPressed: () => _showShopChangeDialog(context),
-                        icon: Icon(
-                          Icons.store_outlined,
-                          color: theme.colorScheme.primary,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primaryContainer,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
+                  ),
+                  // Carousel Section
+                  SliverToBoxAdapter(
+                    child: _buildCarousel(context),
+                  ),
+                  // Category Section
+                  SliverToBoxAdapter(
+                    child: _buildCategorySection(context),
+                  ),
+                  // Product Grid
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ProductGrid(shopId: selectedShop!.id),
                     ),
-                    IconButton(
-                      onPressed: () => _showProfileOptions(context),
-                      icon: const Icon(Icons.person_outline),
-                      style: IconButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        foregroundColor: theme.colorScheme.primary,
-                        padding: const EdgeInsets.all(12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildCarousel(context),
-              const SizedBox(
-                height: 15,
-              ),
-              Expanded(
-                child: ProductGrid(shopId: selectedShop!.id),
-              ),
-            ] else ...[
-              ShopSelectionScreen(onShopSelected: _onShopSelected),
-            ],
-          ],
-        ),
+                  ),
+                ],
+              )
+            : ShopSelectionScreen(onShopSelected: _onShopSelected),
       ),
       bottomNavigationBar: CustomBottomNav(
         selectedIndex: _selectedIndex,

@@ -153,7 +153,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       message: "shopkeeper and shop created successfully",
       data: {
         name: shop.name,
-        shopID:shop._id
+        shopID:shop.shopId
       }
     });
 
@@ -287,14 +287,17 @@ app.post("/api/user/login", async (req, res) => {
 
 app.post("/api/shopkeeper/login", async (req, res) => {
   const { shopid, password } = req.body;
+  console.log(shopid,password)
+  
 
   try {
    
     const shopkeeper = await shopkeeperModel.findOne()
       .populate({
         path: 'shop',
-        match: { shopId: shopid } 
+        match: { shopId: `${shopid}` } 
       });
+    console.log(shopkeeper)
 
     if (!shopkeeper) {
       return res.status(404).json({
