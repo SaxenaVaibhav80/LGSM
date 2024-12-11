@@ -305,75 +305,81 @@ app.post("api/addStock",async(req,res)=>
 
         let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
-        const product = {
-          productName,
-          productType,
-          category,
-          quantity,
-          unit,
-          pricePerUnit,
-          expiry: expiryDate, 
-          productImage
-      };
-
-      if (!inventory) {
+        if (!inventory) {
           inventory = await  inventoryModel.create({
               shop_id: shopkeeper.shop._id,
               loose: [],
               packed: []
           });
-      }
-      if (productType === "loose") {
-            let existingProduct = inventory.loose.find(product => 
-              product.productName === productName && 
-              product.category === category
-          );
-        
-          if(existingProduct)
-            {
-              return res.status(400).json({ message: "product already exist" });
-            }
-          else{
-            inventory.loose.push(product);
-            await inventory.save(); 
-            res.status(201).json({
-              message: "Product added successfully",
-              product: product
-          });
-          }
-          
-      }else if(productType=== "packed") {
+        }
+        const isLooseAvailable= await inventoryModel.findOne({
+          shop_id: shopkeeper.shop._id,  
+          'loose.productName': productName, 
+          'loose.category': category 
+        });
 
-        let existingProduct = inventory.packed.find(product => 
-          product.productName === productName && 
-          product.category === category
-        );
-        if(existingProduct)
+        if(isLooseAvailable)
         {
           return res.status(400).json({ message: "product already exist" });
-        }
-        else{
-          inventory.packed.push(product);
-          await inventory.save(); 
+        }else{
+          const product = {
+            productName,
+            productType,
+            category,
+            quantity,
+            unit,
+            pricePerUnit,
+            expiry: expiryDate,
+            productImage
+          };
+  
+          inventory.loose.push(product);
+          await inventory.save();
           res.status(201).json({
             message: "Product added successfully",
-            product: product
-        });
+            product
+          });
         }
-      } 
 
-      else {
-        return res.status(400).json({ message: "Invalid product type. It should be 'loose' or 'packet'" });
-      }
-    
-      }catch(err)
-      {
-        return res.status(404).json({ message: "please relogin"});
-      }
+        const isPackedAvailable= await inventoryModel.findOne({
+          shop_id: shopkeeper.shop._id,  
+          'packed.productName': productName, 
+          'packed.category': category 
+        });
+
+        if(isPackedAvailable)
+        {
+          return res.status(400).json({ message: "product already exist" });
+        }else{
+          const product = {
+            productName,
+            productType,
+            category,
+            quantity,
+            unit,
+            pricePerUnit,
+            expiry: expiryDate,
+            productImage
+          };
+
+          inventory.packed.push(product);
+          await inventory.save();
+          res.status(201).json({
+            message: "Product added successfully",
+            product
+          });
+        }
+
       
-    }
-})
 
+    }catch(error)
+    {
+      console.log(error)
+    }
+
+    
+  }
+})
 
 
 
