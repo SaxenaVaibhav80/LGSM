@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const userModel = require("./models/user.js");
 const jwt = require("jsonwebtoken");
 const shopkeeperModel = require("./models/shopkeeper.js")
-const InventoryModel = require("./models/inventory.js")
+const inventoryModel = require("./models/inventory.js")
 const ShopsModel = require("./models/shops.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -282,6 +282,86 @@ app.post("/api/user/login", async (req, res) => {
     });
   }
 });
+
+// ----------------------Add stock post handler --------------------------->
+
+app.post("api/addStock", async (req, res) => {
+  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage } = req.body;
+
+  const token = req.cookies.token;
+
+  if (token) {
+    try {
+      const verification = jwt.verify(token, secret_key);
+      const shopkeeper_id = verification.id;
+      const shopkeeper = await shopkeeperModel.findOne({ shopkeeper_id }).populate("shop");
+
+      if (!shopkeeper || !shopkeeper.shop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+
+      let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
+
+      if (!inventory) {
+        inventory = await inventoryModel.create({
+          shop_id: shopkeeper.shop._id,
+          loose: [],
+          packed: []
+        });
+      }
+
+      const existingProduct = await inventoryModel.findOne({
+        shop_id: shopkeeper.shop._id,
+        $or: [
+          { 'loose.productName': productName, 'loose.category': category },
+          { 'packed.productName': productName, 'packed.category': category }
+        ]
+      });
+
+      if (existingProduct) {
+        return res.status(400).json({ message: "Product already exists" });
+      }
+
+     
+      if (productType === 'loose') {
+        await inventoryModel.updateOne(
+          { shop_id: shopkeeper.shop._id },
+          {
+            $push: {
+              loose: {
+                productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
+              }
+            }
+          }
+        );
+        res.status(201).json({ message: "Loose product added successfully" });
+      } else if (productType === 'packed') {
+        await inventoryModel.updateOne(
+          { shop_id: shopkeeper.shop._id },
+          {
+            $push: {
+              packed: {
+                productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
+              }
+            }
+          }
+        );
+        res.status(201).json({ message: "Packed product added successfully" });
+      } else {
+        return res.status(400).json({ message: "Invalid product type. It should be 'loose' or 'packed'" });
+      }
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  } else {
+    return res.status(401).json({ message: "Unauthorized. Please login." });
+  }
+});
+
+
+
 
 //----------------------- shopkeeper login router-------------------------->
 
