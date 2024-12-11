@@ -285,101 +285,81 @@ app.post("/api/user/login", async (req, res) => {
 
 // ----------------------Add stock post handler --------------------------->
 
-app.post("api/addStock",async(req,res)=>
-{
-  const {productName ,productType, category, quantity ,unit, pricePerUnit, expiryDate,productImage} = req.body
+app.post("api/addStock", async (req, res) => {
+  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage } = req.body;
 
-  const token = req.cookies.token
+  const token = req.cookies.token;
 
-  if(token)
-    {
-      try{
-        
-        const verification = jwt.verify(token,secret_key)
-        const shopkeeper_id = verification.id
-        const shopkeeper= await shopkeeperModel.findOne({shopkeeper_id}).populate("shop");
+  if (token) {
+    try {
+      const verification = jwt.verify(token, secret_key);
+      const shopkeeper_id = verification.id;
+      const shopkeeper = await shopkeeperModel.findOne({ shopkeeper_id }).populate("shop");
 
-        if (!shopkeeper || !shopkeeper.shop) {
-          return res.status(404).json({ message: "Shop not found" });
-        }
+      if (!shopkeeper || !shopkeeper.shop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
 
-        let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
+      let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
-        if (!inventory) {
-          inventory = await  inventoryModel.create({
-              shop_id: shopkeeper.shop._id,
-              loose: [],
-              packed: []
-          });
-        }
-        const isLooseAvailable= await inventoryModel.findOne({
-          shop_id: shopkeeper.shop._id,  
-          'loose.productName': productName, 
-          'loose.category': category 
+      if (!inventory) {
+        inventory = await inventoryModel.create({
+          shop_id: shopkeeper.shop._id,
+          loose: [],
+          packed: []
         });
+      }
 
-        if(isLooseAvailable)
-        {
-          return res.status(400).json({ message: "product already exist" });
-        }else{
-          const product = {
-            productName,
-            productType,
-            category,
-            quantity,
-            unit,
-            pricePerUnit,
-            expiry: expiryDate,
-            productImage
-          };
-  
-          inventory.loose.push(product);
-          await inventory.save();
-          res.status(201).json({
-            message: "Product added successfully",
-            product
-          });
-        }
+      const existingProduct = await inventoryModel.findOne({
+        shop_id: shopkeeper.shop._id,
+        $or: [
+          { 'loose.productName': productName, 'loose.category': category },
+          { 'packed.productName': productName, 'packed.category': category }
+        ]
+      });
 
-        const isPackedAvailable= await inventoryModel.findOne({
-          shop_id: shopkeeper.shop._id,  
-          'packed.productName': productName, 
-          'packed.category': category 
-        });
+      if (existingProduct) {
+        return res.status(400).json({ message: "Product already exists" });
+      }
 
-        if(isPackedAvailable)
-        {
-          return res.status(400).json({ message: "product already exist" });
-        }else{
-          const product = {
-            productName,
-            productType,
-            category,
-            quantity,
-            unit,
-            pricePerUnit,
-            expiry: expiryDate,
-            productImage
-          };
+     
+      if (productType === 'loose') {
+        await inventoryModel.updateOne(
+          { shop_id: shopkeeper.shop._id },
+          {
+            $push: {
+              loose: {
+                productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
+              }
+            }
+          }
+        );
+        res.status(201).json({ message: "Loose product added successfully" });
+      } else if (productType === 'packed') {
+        await inventoryModel.updateOne(
+          { shop_id: shopkeeper.shop._id },
+          {
+            $push: {
+              packed: {
+                productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
+              }
+            }
+          }
+        );
+        res.status(201).json({ message: "Packed product added successfully" });
+      } else {
+        return res.status(400).json({ message: "Invalid product type. It should be 'loose' or 'packed'" });
+      }
 
-          inventory.packed.push(product);
-          await inventory.save();
-          res.status(201).json({
-            message: "Product added successfully",
-            product
-          });
-        }
-
-      
-
-    }catch(error)
-    {
-      console.log(error)
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
     }
-
-    
+  } else {
+    return res.status(401).json({ message: "Unauthorized. Please login." });
   }
-})
+});
+
 
 
 
