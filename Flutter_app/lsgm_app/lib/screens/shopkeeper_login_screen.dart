@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:lsgm_app/routes/navigation.dart';
 import 'package:lsgm_app/screens/shopkeeper_homeScreen.dart';
 import 'package:lsgm_app/screens/shopkeeper_signup_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShopkeeperLoginScreen extends StatefulWidget {
   const ShopkeeperLoginScreen({super.key});
@@ -54,6 +55,8 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
         if (response.statusCode == 200 && responseData['success']) {
           // Store the token (you might want to use secure storage)
           final token = responseData['data']['token'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('authToken', token);
 
           if (!mounted) return;
 
@@ -64,7 +67,7 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
               builder: (context) => ShopkeeperDashboard(
                 shopkeeperName: responseData['data']['name'],
                 hasInventory:
-                    false, // You might want to add this to your server response
+                    true, // You might want to add this to your server response
               ),
             ),
           );

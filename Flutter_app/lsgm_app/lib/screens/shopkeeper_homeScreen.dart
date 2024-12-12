@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/screens/add_stock.dart';
+import 'package:lsgm_app/screens/shopkeeper_login_screen.dart';
 import 'package:lsgm_app/screens/update_inventory.dart';
 import 'package:lsgm_app/widgets/bottom_navBar_shopkeeper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShopkeeperDashboard extends StatefulWidget {
   final String shopkeeperName;
@@ -133,6 +135,138 @@ class _ShopkeeperDashboardState extends State<ShopkeeperDashboard> {
     );
   }
 
+  Future<void> _handleLogout() async {
+    // Show confirmation dialog
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('LOGOUT', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      if (!mounted) return;
+
+      // Close bottom sheet and navigate to login
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const ShopkeeperLoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
+  void _showProfileBottomSheet() {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Profile Section
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: theme.colorScheme.primary,
+                child: const Icon(Icons.person, color: Colors.white),
+              ),
+              title: Text(
+                widget.shopkeeperName,
+                style: theme.textTheme.titleMedium,
+              ),
+              subtitle: const Text('Shopkeeper'),
+            ),
+
+            const Divider(),
+
+            // Profile Options
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                // Add navigation to edit profile screen
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Change Password'),
+              onTap: () {
+                Navigator.pop(context);
+                // Add navigation to change password screen
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                // Add navigation to settings screen
+              },
+            ),
+
+            const Divider(),
+
+            // Logout Option
+            ListTile(
+              leading: Icon(
+                Icons.logout,
+                color: theme.colorScheme.error,
+              ),
+              title: Text(
+                'Logout',
+                style: TextStyle(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _handleLogout();
+              },
+            ),
+
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -165,9 +299,7 @@ class _ShopkeeperDashboardState extends State<ShopkeeperDashboard> {
             ),
             IconButton(
               icon: const Icon(Icons.account_circle_outlined, size: 32),
-              onPressed: () {
-                // Handle profile button tap
-              },
+              onPressed: _showProfileBottomSheet,
               tooltip: 'Profile',
             ),
           ],

@@ -285,16 +285,16 @@ app.post("/api/user/login", async (req, res) => {
 
 // ----------------------Add stock post handler --------------------------->
 
-app.post("api/addStock", async (req, res) => {
-  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage } = req.body;
+app.post("/api/addStock", async (req, res) => {
+  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage , token} = req.body;
 
-  const token = req.cookies.token;
 
   if (token) {
     try {
       const verification = jwt.verify(token, secret_key);
       const shopkeeper_id = verification.id;
-      const shopkeeper = await shopkeeperModel.findOne({ shopkeeper_id }).populate("shop");
+      const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
+      console.log(shopkeeper)
 
       if (!shopkeeper || !shopkeeper.shop) {
         return res.status(404).json({ message: "Shop not found" });
@@ -323,7 +323,7 @@ app.post("api/addStock", async (req, res) => {
       }
 
      
-      if (productType === 'loose') {
+      if (productType === 'Loose') {
         await inventoryModel.updateOne(
           { shop_id: shopkeeper.shop._id },
           {
@@ -335,7 +335,7 @@ app.post("api/addStock", async (req, res) => {
           }
         );
         res.status(201).json({ message: "Loose product added successfully" });
-      } else if (productType === 'packed') {
+      } else if (productType === 'Packed') {
         await inventoryModel.updateOne(
           { shop_id: shopkeeper.shop._id },
           {
@@ -372,12 +372,8 @@ app.post("/api/shopkeeper/login", async (req, res) => {
 
   try {
    
-    const shopkeeper = await shopkeeperModel.findOne()
-      .populate({
-        path: 'shop',
-        match: { shopId: `${shopid}` } 
-      });
-    console.log(shopkeeper)
+    const shop = await ShopsModel.findOne({ shopId: shopid })
+    const shopkeeper = await shopkeeperModel.findOne({shop:shop._id})
 
     if (!shopkeeper) {
       return res.status(404).json({
@@ -425,7 +421,6 @@ app.post("/api/shopkeeper/login", async (req, res) => {
     });
   }
 });
-
 
 // Start server
 const server = http.createServer(app);

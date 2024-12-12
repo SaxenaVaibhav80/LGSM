@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddStockPage extends StatefulWidget {
   const AddStockPage({super.key});
@@ -251,6 +252,8 @@ class _AddStockPageState extends State<AddStockPage> {
       if (_productImage != null) {
         base64Image = base64Encode(_productImage!);
       }
+      final SharedPreferences pref = await SharedPreferences.getInstance();
+      String? authToken = pref.getString('authToken');
 
       final response = await http.post(
         Uri.parse('http://localhost:9000/api/addStock'),
@@ -266,6 +269,7 @@ class _AddStockPageState extends State<AddStockPage> {
           'pricePerUnit': double.parse(_priceController.text),
           'expiryDate': _expiryDate?.toIso8601String(),
           'productImage': "",
+          'token' : authToken,
         }),
       );
 
