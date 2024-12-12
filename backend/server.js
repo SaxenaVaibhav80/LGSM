@@ -370,11 +370,25 @@ app.post("/api/shopkeeper/login", async (req, res) => {
 
   try {
    
-    const shopkeeper = await shopkeeperModel.findOne()
-      .populate({
-        path: 'shop',
-        match: { shopId: shopid } 
+    if (!shopid || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Shop ID and password are required",
       });
+    }
+
+      
+    const shop = await ShopsModel.findOne({ shopId: shopid });
+
+      if (!shop) {
+        return res.status(404).json({
+          success: false,
+          message: "Shop ID not found",
+        });
+      }
+  
+
+    const shopkeeper = await shopkeeperModel.findOne({ shop: shop._id });
 
       if (!shopkeeper) {
         return res.status(404).json({
