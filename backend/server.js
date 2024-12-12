@@ -288,8 +288,6 @@ app.post("/api/user/login", async (req, res) => {
 app.post("api/addStock", async (req, res) => {
   const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage ,token} = req.body;
 
- 
-
   if (token) {
     try {
       const verification = jwt.verify(token, secret_key);
@@ -379,7 +377,7 @@ app.post("/api/shopkeeper/login", async (req, res) => {
 
       
     const shop = await ShopsModel.findOne({ shopId: shopid });
-    
+
       if (!shop) {
         return res.status(404).json({
           success: false,
