@@ -170,7 +170,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
 
 app.get('/categories', (req, res) => {
   const categories = [
-
+    
       {
           name: "Groceries",
           image_url: "https://media.istockphoto.com/id/1248691232/vector/set-of-packs-of-cereals-grains-nuts-on-shelf-for-kitchen-storage.jpg?s=612x612&w=0&k=20&c=LV9HUtSoSrYG-gSPW7A6Bpo6IiuwHhQfrwumd1SacvQ="
@@ -286,9 +286,9 @@ app.post("/api/user/login", async (req, res) => {
 // ----------------------Add stock post handler --------------------------->
 
 app.post("api/addStock", async (req, res) => {
-  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage } = req.body;
+  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage ,token} = req.body;
 
-  const token = req.cookies.token;
+ 
 
   if (token) {
     try {
@@ -370,19 +370,33 @@ app.post("/api/shopkeeper/login", async (req, res) => {
 
   try {
    
-    const shopkeeper = await shopkeeperModel.findOne()
-      .populate({
-        path: 'shop',
-        match: { shopId: shopid } 
-      });
-
-    if (!shopkeeper) {
-      return res.status(404).json({
+    if (!shopid || !password) {
+      return res.status(400).json({
         success: false,
-        message: "Shop ID not found"
+        message: "Shop ID and password are required",
       });
     }
 
+      
+    const shop = await ShopsModel.findOne({ shopId: shopid });
+    
+      if (!shop) {
+        return res.status(404).json({
+          success: false,
+          message: "Shop ID not found",
+        });
+      }
+  
+
+    const shopkeeper = await shopkeeperModel.findOne({ shop: shop._id });
+
+      if (!shopkeeper) {
+        return res.status(404).json({
+          success: false,
+          message: "No shopkeeper associated with this Shop ID",
+        });
+      }
+    
     const passverify = await bcrypt.compare(password, shopkeeper.password);
     if (!passverify) {
       return res.status(401).json({
