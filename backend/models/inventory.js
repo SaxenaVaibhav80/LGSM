@@ -31,11 +31,16 @@ const InventorySchema = new mongoose.Schema({
     ],
     categories: [{
         category:String,
+        productName:String,
+        discription:String,
+
         count:{
            type: Number,
            default:0
         }
-    }]
+    }],
+
+    units:[String]
 });
 
 const Inventory = mongoose.model('Inventory', InventorySchema);

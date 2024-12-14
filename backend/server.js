@@ -18,6 +18,8 @@ const app = express();
 const port = process.env.PORT || 3000;       // taking port from env else default port 3000
 const secret_key = process.env.SECRET_KEY;
 
+
+
 // --------------------------------------- cors-------------------------------------->
 app.use(cors({
   origin: true, 
@@ -149,6 +151,38 @@ app.post("/api/checkInventory",async(req,res)=>
 
 })
 
+//------------------------- adding additional units ------------------------------------------>
+
+app.post('/api/setUnits',async(req,res)=>
+{
+  const {token , unit} = req.body
+
+  if(token)
+  {
+    try{
+        const verify = jwt.verify(token,secret_key)
+        const id = verify.id
+        const shopkeeper = await shopkeeperModel.findOne({_id:id}).populate('shop')
+        const Updateinventory = await inventoryModel.findOneAndUpdate(
+          {shop_id: shopkeeper.shop._id},
+          { $push: { units: unit } },
+          {new:true}
+      )
+      console.log(Updateinventory)
+
+      res.status(200).json({message:"unit added successfuly"})
+
+    }catch(err)
+    {
+      return res.status(500).json({message:"internal server error"})
+    }
+  }
+  else{
+    return res.status(401).json({ message: "Unauthorized. Please login." });
+  }
+
+})
+
 //------------------------ shopkeeper signup------------------------->
 
 app.post("/api/shopkeeper/signup", async (req, res) => {
@@ -183,6 +217,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
      location:address
     });
     
+
     const shopkeeper = await shopkeeperModel.create({
       ShopName:ShopName,
       ShopkeeperName:ShopkeeperName,
@@ -193,6 +228,21 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
       password: encPass,
       shop: shop._id
     });
+
+    const inventory = await inventoryModel.create({
+      shop_id: shopkeeper.shop._id,
+      loose: [],
+      packed: [],
+      categories: [],
+      units:["Kg",'Grams','ML','Packets','Box','Bundle','Dozens','Liters','Pieces']
+
+    });
+
+    await ShopsModel.findOneAndUpdate(
+      { _id: shopkeeper.shop._id },
+      { inventory: inventory._id },
+      { new: true }
+    );
 
     res.status(200).json({
       success: true,
@@ -346,22 +396,6 @@ app.post("/api/addStock", async (req, res) => {
 
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
-    
-      if (!inventory) {
-        inventory = await inventoryModel.create({
-          shop_id: shopkeeper.shop._id,
-          loose: [],
-          packed: [],
-          categories: []
-        });
-
-        await ShopsModel.findOneAndUpdate(
-          { _id: shopkeeper.shop._id },
-          { inventory: inventory._id },
-          { new: true }
-        );
-      }
-
       
       const categoryObj = inventory.categories.find(cat => cat.category === category);
 
@@ -376,7 +410,7 @@ app.post("/api/addStock", async (req, res) => {
           },
           { new: true }
         );
-      } else if (categoryObj.count < 2) {
+      } else if (categoryObj.count >= 1) {
         
         await inventoryModel.findOneAndUpdate(
           { shop_id: shopkeeper.shop._id, "categories.category": category },
