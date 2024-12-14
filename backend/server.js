@@ -126,10 +126,10 @@ app.post("/api/checkInventory",async(req,res)=>
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
       if (!inventory) {
-        return res.status(200).json({ message: true });
+        return res.status(200).json({ isInventory: true });
       }
       else{
-        return res.status(200).json({ message: false});
+        return res.status(200).json({ isInventory: false});
       }
 
     } catch (error) {
