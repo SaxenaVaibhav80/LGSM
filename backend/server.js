@@ -102,6 +102,45 @@ async function getuuid(shopname,pincode)
     return uid
   }
 }
+//------------------------ inventory check -------------------------->
+
+app.post("/api/checkInventory",async(req,res)=>
+{
+
+  const token = req.body.token;
+
+  console.log(token)
+
+  if (token!=null && token!=undefined) {
+    try {
+      const verification = jwt.verify(token, secret_key);
+      const shopkeeper_id = verification.id;
+      const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
+
+      console.log(shopkeeper)
+
+      if (!shopkeeper || !shopkeeper.shop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+
+      let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
+
+      if (!inventory) {
+        return res.status(200).json({ message: true });
+      }
+      else{
+        return res.status(200).json({ message: false});
+      }
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  } else {
+    return res.status(401).json({ message: "Unauthorized. Please login." });
+  }
+
+})
 
 //------------------------ shopkeeper signup------------------------->
 
