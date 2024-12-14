@@ -128,10 +128,15 @@ app.post("/api/checkInventory",async(req,res)=>
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
       
       if (!inventory || inventory==null) {
-        return res.status(200).json({ isInventory: []});
+        return res.status(200).json({ isInventory: false});
       }
-      else{
-        return res.status(200).json({ loose:inventory.loose,packed:inventory.packed});
+      else if (inventory.loose.length!=0 || inventory.packed.length!=0)
+      {
+        return res.status(200).json({ isInventory:true});
+      }
+      else if(inventory.loose.length==0 && inventory.packed.length==0)
+      {
+        return res.status(200).json({ isInventory:false});
       }
 
     } catch (error) {
@@ -207,7 +212,7 @@ app.post("/api/shopkeeper/signup", async (req, res) => {
   }
 });
 
-//-----sending catagories ----------->
+//-----sending categories ----------->
 
 app.get('/categories', (req, res) => {
   const categories = [
@@ -327,56 +332,62 @@ app.post("/api/user/login", async (req, res) => {
 // ----------------------Add stock post handler --------------------------->
 
 app.post("/api/addStock", async (req, res) => {
-  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage , token} = req.body;
-
-
+  const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage, token } = req.body;
 
   if (token) {
     try {
       const verification = jwt.verify(token, secret_key);
       const shopkeeper_id = verification.id;
-      const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
-      // console.log(shopkeeper)
+      const shopkeeper = await shopkeeperModel.findOne({ _id: shopkeeper_id }).populate("shop");
 
       if (!shopkeeper || !shopkeeper.shop) {
         return res.status(404).json({ message: "Shop not found" });
       }
 
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
-     
+
+    
       if (!inventory) {
-        const newinventory = await inventoryModel.create({
+        inventory = await inventoryModel.create({
           shop_id: shopkeeper.shop._id,
           loose: [],
           packed: [],
-          categories:[]
+          categories: []
         });
 
-        const updateShop = await ShopsModel.findOneAndUpdate(
-          { _id: shopkeeper.shop._id },  
-          { inventory: newinventory._id },    
-          { new: true }        
+        await ShopsModel.findOneAndUpdate(
+          { _id: shopkeeper.shop._id },
+          { inventory: inventory._id },
+          { new: true }
         );
       }
 
-      // console.log(inventory.categories)
+      
+      const categoryObj = inventory.categories.find(cat => cat.category === category);
 
-      // if(inventory.categories==[])
-      // {
-      //   console.log("hello")
-      //   const update = await inventoryModel.findOneAndUpdate(
-      //     {shop_id: shopkeeper.shop._id},
-      //     {
-      //     $push:{
-      //       categories:{category:category,count:1}
-      //     },
-          
-      //     },
-      //     {new:true}
-          
-      //   )
-      // }
+      if (!categoryObj) {
+      
+        await inventoryModel.findOneAndUpdate(
+          { shop_id: shopkeeper.shop._id },
+          {
+            $push: {
+              categories: { category: category, count: 1 }
+            }
+          },
+          { new: true }
+        );
+      } else if (categoryObj.count < 2) {
+        
+        await inventoryModel.findOneAndUpdate(
+          { shop_id: shopkeeper.shop._id, "categories.category": category },
+          {
+            $inc: { "categories.$.count": 1 }
+          },
+          { new: true }
+        );
+      }
 
+    
       const existingProduct = await inventoryModel.findOne({
         shop_id: shopkeeper.shop._id,
         $or: [
@@ -389,7 +400,7 @@ app.post("/api/addStock", async (req, res) => {
         return res.status(400).json({ message: "Product already exists" });
       }
 
-     
+    
       if (productType === 'Loose') {
         await inventoryModel.updateOne(
           { shop_id: shopkeeper.shop._id },
@@ -400,23 +411,21 @@ app.post("/api/addStock", async (req, res) => {
               }
             }
           },
-          {new:true}
+          { new: true }
         );
         res.status(201).json({ message: "Loose product added successfully" });
       } else if (productType === 'Packed') {
-       const added= await inventoryModel.findOneAndUpdate(
+        await inventoryModel.updateOne(
           { shop_id: shopkeeper.shop._id },
           {
             $push: {
               packed: {
                 productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
               }
-            },
-            
+            }
           },
-          {new:true}
+          { new: true }
         );
-
         res.status(201).json({ message: "Packed product added successfully" });
       } else {
         return res.status(400).json({ message: "Invalid product type. It should be 'loose' or 'packed'" });
@@ -430,9 +439,6 @@ app.post("/api/addStock", async (req, res) => {
     return res.status(401).json({ message: "Unauthorized. Please login." });
   }
 });
-
-
-
 
 //----------------------- shopkeeper login router-------------------------->
 
