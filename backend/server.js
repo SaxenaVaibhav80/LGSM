@@ -119,6 +119,7 @@ app.post("/api/checkInventory",async(req,res)=>
       const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('Inventory')
       const inventoryItems = shop.inventory
       console.log(shopkeeper)
+      console.log(inventoryItems) 
 
       if (!shopkeeper || !shopkeeper.shop) {
         return res.status(404).json({ message: "Shop not found" });
