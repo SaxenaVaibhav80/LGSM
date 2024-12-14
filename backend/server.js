@@ -116,7 +116,8 @@ app.post("/api/checkInventory",async(req,res)=>
       const verification = jwt.verify(token, secret_key);
       const shopkeeper_id = verification.id;
       const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
-
+      const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('Inventory')
+      const inventoryItems = shop.inventory
       console.log(shopkeeper)
 
       if (!shopkeeper || !shopkeeper.shop) {
@@ -129,7 +130,7 @@ app.post("/api/checkInventory",async(req,res)=>
         return res.status(200).json({ isInventory: true });
       }
       else{
-        return res.status(200).json({ isInventory: false});
+        return res.status(200).json({ isInventory:inventoryItems});
       }
 
     } catch (error) {
@@ -342,11 +343,19 @@ app.post("/api/addStock", async (req, res) => {
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
       if (!inventory) {
-        inventory = await inventoryModel.create({
+        const newinventory = await inventoryModel.create({
           shop_id: shopkeeper.shop._id,
           loose: [],
           packed: []
         });
+
+        const updateShop = await ShopsModel.findOneAndUpdate(
+          { _id: shopkeeper.shop._id },  
+          { inventory: newinventory._id },    
+          { new: true }        
+        );
+
+        console.log(updateShop)
       }
 
       const existingProduct = await inventoryModel.findOne({
