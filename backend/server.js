@@ -102,6 +102,47 @@ async function getuuid(shopname,pincode)
     return uid
   }
 }
+//------------------------ inventory check -------------------------->
+
+app.post("/api/checkInventory",async(req,res)=>
+{
+
+  const token = req.body.token;
+
+  console.log(token)
+
+  if (token!=null && token!=undefined) {
+    try {
+      const verification = jwt.verify(token, secret_key);
+      const shopkeeper_id = verification.id;
+      const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
+      const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('Inventory')
+      const inventoryItems = shop.inventory
+      console.log(shopkeeper)
+      console.log(inventoryItems) 
+
+      if (!shopkeeper || !shopkeeper.shop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+
+      let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
+
+      if (!inventory) {
+        return res.status(200).json({ isInventory: true });
+      }
+      else{
+        return res.status(200).json({ isInventory:inventoryItems});
+      }
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  } else {
+    return res.status(401).json({ message: "Unauthorized. Please login." });
+  }
+
+})
 
 //------------------------ shopkeeper signup------------------------->
 
@@ -303,11 +344,19 @@ app.post("/api/addStock", async (req, res) => {
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
 
       if (!inventory) {
-        inventory = await inventoryModel.create({
+        const newinventory = await inventoryModel.create({
           shop_id: shopkeeper.shop._id,
           loose: [],
           packed: []
         });
+
+        const updateShop = await ShopsModel.findOneAndUpdate(
+          { _id: shopkeeper.shop._id },  
+          { inventory: newinventory._id },    
+          { new: true }        
+        );
+
+        console.log(updateShop)
       }
 
       const existingProduct = await inventoryModel.findOne({
