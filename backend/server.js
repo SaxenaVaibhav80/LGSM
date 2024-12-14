@@ -10,6 +10,7 @@ const inventoryModel = require("./models/inventory.js")
 const ShopsModel = require("./models/shops.js")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const Inventory = require("./models/inventory.js");
 
 dotenv.config();
 
@@ -117,21 +118,20 @@ app.post("/api/checkInventory",async(req,res)=>
       const shopkeeper_id = verification.id;
       const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
       const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('Inventory')
-      const inventoryItems = shop.inventory
       console.log(shopkeeper)
-      console.log(inventoryItems) 
+  
 
       if (!shopkeeper || !shopkeeper.shop) {
         return res.status(404).json({ message: "Shop not found" });
       }
 
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
-
-      if (!inventory) {
-        return res.status(200).json({ isInventory: true });
+      
+      if (!inventory || inventory==null) {
+        return res.status(200).json({ isInventory: []});
       }
       else{
-        return res.status(200).json({ isInventory:inventoryItems});
+        return res.status(200).json({ loose:inventory.loose,packed:inventory.packed});
       }
 
     } catch (error) {
@@ -330,24 +330,26 @@ app.post("/api/addStock", async (req, res) => {
   const { productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage , token} = req.body;
 
 
+
   if (token) {
     try {
       const verification = jwt.verify(token, secret_key);
       const shopkeeper_id = verification.id;
       const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
-      console.log(shopkeeper)
+      // console.log(shopkeeper)
 
       if (!shopkeeper || !shopkeeper.shop) {
         return res.status(404).json({ message: "Shop not found" });
       }
 
       let inventory = await inventoryModel.findOne({ shop_id: shopkeeper.shop._id });
-
+     
       if (!inventory) {
         const newinventory = await inventoryModel.create({
           shop_id: shopkeeper.shop._id,
           loose: [],
-          packed: []
+          packed: [],
+          categories:[]
         });
 
         const updateShop = await ShopsModel.findOneAndUpdate(
@@ -355,9 +357,25 @@ app.post("/api/addStock", async (req, res) => {
           { inventory: newinventory._id },    
           { new: true }        
         );
-
-        console.log(updateShop)
       }
+
+      // console.log(inventory.categories)
+
+      // if(inventory.categories==[])
+      // {
+      //   console.log("hello")
+      //   const update = await inventoryModel.findOneAndUpdate(
+      //     {shop_id: shopkeeper.shop._id},
+      //     {
+      //     $push:{
+      //       categories:{category:category,count:1}
+      //     },
+          
+      //     },
+      //     {new:true}
+          
+      //   )
+      // }
 
       const existingProduct = await inventoryModel.findOne({
         shop_id: shopkeeper.shop._id,
@@ -381,20 +399,24 @@ app.post("/api/addStock", async (req, res) => {
                 productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
               }
             }
-          }
+          },
+          {new:true}
         );
         res.status(201).json({ message: "Loose product added successfully" });
       } else if (productType === 'Packed') {
-        await inventoryModel.updateOne(
+       const added= await inventoryModel.findOneAndUpdate(
           { shop_id: shopkeeper.shop._id },
           {
             $push: {
               packed: {
                 productName, productType, category, quantity, unit, pricePerUnit, expiryDate, productImage
               }
-            }
-          }
+            },
+            
+          },
+          {new:true}
         );
+
         res.status(201).json({ message: "Packed product added successfully" });
       } else {
         return res.status(400).json({ message: "Invalid product type. It should be 'loose' or 'packed'" });

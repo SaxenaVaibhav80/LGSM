@@ -28,7 +28,14 @@ const InventorySchema = new mongoose.Schema({
             expiry: Date, 
 
         }
-    ]
+    ],
+    categories: [{
+        category:String,
+        count:{
+           type: Number,
+           default:0
+        }
+    }]
 });
 
 const Inventory = mongoose.model('Inventory', InventorySchema);
