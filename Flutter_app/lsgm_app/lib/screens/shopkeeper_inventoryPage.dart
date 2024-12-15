@@ -69,7 +69,7 @@ class _InventoryPageState extends State<InventoryPage> {
     ],
     'Dairy': [
       InventoryItem(
-        name: 'Milk',
+        name: 'rice 2',
         quantity: 50,
         unit: 'L',
         pricePerUnit: 1.8,

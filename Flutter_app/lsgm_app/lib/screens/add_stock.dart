@@ -4,6 +4,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:universal_html/html.dart' as html;
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AddStockPage extends StatefulWidget {
   const AddStockPage({super.key});
@@ -21,7 +25,7 @@ class _AddStockPageState extends State<AddStockPage> {
   final _priceController = TextEditingController();
   final _customCategoryController = TextEditingController();
   final _customUnitController = TextEditingController();
-  final _productDescriptionController = TextEditingController();
+  final _numberOfItemsController = TextEditingController();
 
   // Selected values
   String? _selectedCategory;
@@ -31,18 +35,19 @@ class _AddStockPageState extends State<AddStockPage> {
 
   // States
   bool _isLoading = false;
-  bool _isGeneratingImage = false;
   String? _errorMessage;
   String? _imageError;
   bool _showSuccess = false;
+  File? _imageFile;
+  Uint8List? _webImage;
   Uint8List? _productImage;
+  final ImagePicker _picker = ImagePicker();
 
   final List<String> _productTypes = [
     'Packed',
     'Loose',
   ];
 
-  // Lists for dropdowns
   List<String> _categories = [
     'Groceries',
     'Fruits and Vegetables',
@@ -80,63 +85,46 @@ class _AddStockPageState extends State<AddStockPage> {
     _priceController.dispose();
     _customCategoryController.dispose();
     _customUnitController.dispose();
-    _productDescriptionController.dispose();
+    _numberOfItemsController.dispose();
     super.dispose();
   }
 
-  Future<void> _generateProductImage() async {
-    if (_productDescriptionController.text.isEmpty) {
-      setState(() {
-        _imageError = 'Please enter a product description';
-      });
-      return;
-    }
-
-    setState(() {
-      _isGeneratingImage = true;
-      _imageError = null;
-    });
-
+  Future<void> _pickImage(ImageSource source) async {
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:9000/api/addStock'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer YOUR_API_KEY',
-        },
-        body: json.encode({
-          'prompt': _productDescriptionController.text,
-          'n': 1,
-          'size': '256x256',
-        }),
-      );
+      if (kIsWeb) {
+        final html.FileUploadInputElement input = html.FileUploadInputElement()
+          ..accept = 'image/*';
+        input.click();
 
-      if (response.statusCode == 200) {
-        final imageUrl = json.decode(response.body)['data'][0]['url'];
-        final imageResponse = await http.get(Uri.parse(imageUrl));
-
-        if (imageResponse.statusCode == 200) {
+        await input.onChange.first;
+        if (input.files!.isNotEmpty) {
+          final html.File file = input.files![0];
+          final reader = html.FileReader();
+          reader.readAsArrayBuffer(file);
+          await reader.onLoad.first;
           setState(() {
-            _productImage = imageResponse.bodyBytes;
-            _imageError = null;
-          });
-        } else {
-          setState(() {
-            _imageError = 'Failed to download image';
+            _webImage = Uint8List.fromList(reader.result as List<int>);
+            _productImage = _webImage;
           });
         }
       } else {
-        setState(() {
-          _imageError = 'Failed to generate image. Please try again.';
-        });
+        final XFile? pickedFile = await _picker.pickImage(
+          source: source,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 85,
+        );
+
+        if (pickedFile != null) {
+          setState(() {
+            _imageFile = File(pickedFile.path);
+            _productImage = File(pickedFile.path).readAsBytesSync();
+          });
+        }
       }
     } catch (e) {
       setState(() {
-        _imageError = 'Error connecting to image generation service';
-      });
-    } finally {
-      setState(() {
-        _isGeneratingImage = false;
+        _imageError = 'Failed to pick image: $e';
       });
     }
   }
@@ -239,70 +227,6 @@ class _AddStockPageState extends State<AddStockPage> {
     );
   }
 
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-        _showSuccess = false;
-      });
-
-      // Prepare the body without try-catch
-      String? base64Image;
-      if (_productImage != null) {
-        base64Image = base64Encode(_productImage!);
-      }
-      final SharedPreferences pref = await SharedPreferences.getInstance();
-      String? authToken = pref.getString('authToken');
-
-      final response = await http.post(
-        Uri.parse('http://localhost:9000/api/addStock'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'productName': _productNameController.text,
-          'productType': _selectedProductType,
-          'category': _selectedCategory,
-          'quantity': double.parse(_quantityController.text),
-          'unit': _selectedUnit,
-          'pricePerUnit': double.parse(_priceController.text),
-          'expiryDate': _expiryDate?.toIso8601String(),
-          'productImage': "",
-          'token' : authToken,
-        }),
-      );
-
-      // Handle response status
-      if (response.statusCode == 200) {
-        setState(() {
-          _showSuccess = true;
-          // Reset form
-          _formKey.currentState!.reset();
-          _productNameController.clear();
-          _quantityController.clear();
-          _priceController.clear();
-          _productDescriptionController.clear();
-          _selectedCategory = null;
-          _selectedUnit = null;
-          _selectedProductType = null;
-          _expiryDate = null;
-          _productImage = null;
-        });
-      } else {
-        final responseData = json.decode(response.body);
-        setState(() {
-          _errorMessage = responseData['message'] ??
-              'Failed to add stock. Please try again.';
-        });
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -316,36 +240,6 @@ class _AddStockPageState extends State<AddStockPage> {
         _expiryDate = picked;
       });
     }
-  }
-
-  Widget _buildProductTypeDropdown(ThemeData theme) {
-    return DropdownButtonFormField<String>(
-      value: _selectedProductType,
-      decoration: InputDecoration(
-        labelText: 'Product Type*',
-        prefixIcon: Icon(Icons.inventory_2),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      items: _productTypes.map((String type) {
-        return DropdownMenuItem(
-          value: type,
-          child: Text(type),
-        );
-      }).toList(),
-      onChanged: (String? value) {
-        setState(() {
-          _selectedProductType = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select product type';
-        }
-        return null;
-      },
-    );
   }
 
   Widget _buildImageSection(ThemeData theme) {
@@ -385,20 +279,6 @@ class _AddStockPageState extends State<AddStockPage> {
                     )
                   : null,
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _productDescriptionController,
-              decoration: InputDecoration(
-                labelText: 'Product Description for Image Generation',
-                hintText: 'Describe the product for AI image generation',
-                prefixIcon: Icon(Icons.description),
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              maxLines: 3,
-            ),
             if (_imageError != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -408,25 +288,181 @@ class _AddStockPageState extends State<AddStockPage> {
                 ),
               ),
             const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _isGeneratingImage ? null : _generateProductImage,
-              icon: _isGeneratingImage
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Icon(Icons.auto_awesome),
-              label: Text(
-                _isGeneratingImage ? 'Generating...' : 'Generate AI Image',
+            if (!kIsWeb)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      icon: Icon(Icons.camera_alt),
+                      label: Text('Camera'),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                      icon: Icon(Icons.photo_library),
+                      label: Text('Gallery'),
+                    ),
+                  ),
+                ],
+              )
+            else
+              FilledButton.icon(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                icon: Icon(Icons.upload_file),
+                label: Text('Upload Image'),
               ),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildNumberOfItemsField() {
+    return TextFormField(
+      controller: _numberOfItemsController,
+      decoration: InputDecoration(
+        labelText: 'Number of Items per Pack*',
+        prefixIcon: Icon(Icons.inventory),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        hintText: 'E.g., 6 pieces per pack',
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      validator: (value) {
+        if (_selectedProductType == 'Packed') {
+          if (value == null || value.isEmpty) {
+            return 'Please enter number of items per pack';
+          }
+          if (int.tryParse(value) == null || int.parse(value) <= 0) {
+            return 'Please enter a valid number';
+          }
+        }
+        return null;
+      },
+    );
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+        _showSuccess = false;
+      });
+
+      try {
+        String? base64Image;
+        if (_productImage != null) {
+          base64Image = base64Encode(_productImage!);
+        }
+
+        final SharedPreferences pref = await SharedPreferences.getInstance();
+        String? authToken = pref.getString('authToken');
+
+        Map<String, dynamic> requestBody = {
+          'productName': _productNameController.text,
+          'productType': _selectedProductType,
+          'category': _selectedCategory,
+          'quantity': double.parse(_quantityController.text),
+          'unit': _selectedUnit,
+          'pricePerUnit': double.parse(_priceController.text),
+          'expiryDate': _expiryDate?.toIso8601String(),
+          'productImage': base64Image ?? "",
+          'token': authToken,
+        };
+
+        if (_selectedProductType == 'Packed' &&
+            _numberOfItemsController.text.isNotEmpty) {
+          requestBody['numberOfItemsPerPack'] =
+              int.parse(_numberOfItemsController.text);
+        }
+
+        final response = await http.post(
+          Uri.parse('http://localhost:9000/api/addStock'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode(requestBody),
+        );
+
+        if (response.statusCode == 200) {
+          // Clear all fields and reset state
+          setState(() {
+            // Show success message
+            _showSuccess = true;
+
+            // Clear all text controllers
+            _productNameController.clear();
+            _quantityController.clear();
+            _priceController.clear();
+            _numberOfItemsController.clear();
+            _customCategoryController.clear();
+            _customUnitController.clear();
+
+            // Reset all selected values
+            _selectedCategory = null;
+            _selectedUnit = null;
+            _selectedProductType = null;
+            _expiryDate = null;
+
+            // Clear image related states
+            _productImage = null;
+            _imageFile = null;
+            _webImage = null;
+            _imageError = null;
+
+            // Reset form fields
+            _formKey.currentState!.reset();
+          });
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Stock added successfully!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Auto-hide success message after 3 seconds
+          Future.delayed(Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                _showSuccess = false;
+              });
+            }
+          });
+        } else {
+          final responseData = json.decode(response.body);
+          setState(() {
+            _errorMessage = responseData['message'] ??
+                'Failed to add stock. Please try again.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = 'Error submitting form: $e';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -445,6 +481,7 @@ class _AddStockPageState extends State<AddStockPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Category Dropdown
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: InputDecoration(
@@ -483,15 +520,14 @@ class _AddStockPageState extends State<AddStockPage> {
                     return null;
                   },
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
-                // Replace the separate product name and type fields with this Row:
+                const SizedBox(height: 16),
+
+                // Product Name and Type Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 2, // Changed from 3 to 2
+                      flex: 2,
                       child: TextFormField(
                         controller: _productNameController,
                         decoration: InputDecoration(
@@ -512,12 +548,12 @@ class _AddStockPageState extends State<AddStockPage> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      flex: 1, // Changed from 2 to 1
+                      flex: 1,
                       child: DropdownButtonFormField<String>(
                         value: _selectedProductType,
-                        isExpanded: true, // Add this line
+                        isExpanded: true,
                         decoration: InputDecoration(
-                          labelText: 'Type*', // Shortened label
+                          labelText: 'Type*',
                           prefixIcon: Icon(Icons.inventory_2),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -528,18 +564,21 @@ class _AddStockPageState extends State<AddStockPage> {
                             value: type,
                             child: Text(
                               type,
-                              overflow: TextOverflow.ellipsis, // Add this line
+                              overflow: TextOverflow.ellipsis,
                             ),
                           );
                         }).toList(),
                         onChanged: (String? value) {
                           setState(() {
                             _selectedProductType = value;
+                            if (value == 'Loose') {
+                              _numberOfItemsController.clear();
+                            }
                           });
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Select type'; // Shortened error message
+                            return 'Select type';
                           }
                           return null;
                         },
@@ -547,7 +586,7 @@ class _AddStockPageState extends State<AddStockPage> {
                     ),
                   ],
                 ),
-                // Product Image Section
+
                 const SizedBox(height: 16),
                 _buildImageSection(theme),
                 const SizedBox(height: 16),
@@ -629,33 +668,79 @@ class _AddStockPageState extends State<AddStockPage> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
 
-                // Price Field
-                TextFormField(
-                  controller: _priceController,
-                  decoration: InputDecoration(
-                    labelText: 'Price per Unit*',
-                    prefixIcon: Icon(Icons.currency_rupee),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                // Price and Number of Items Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: TextFormField(
+                        controller: _priceController,
+                        decoration: InputDecoration(
+                          labelText: 'Price per Unit*',
+                          prefixIcon: Icon(Icons.currency_rupee),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        keyboardType:
+                            TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*')),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter price';
+                          }
+                          if (double.tryParse(value) == null ||
+                              double.parse(value) <= 0) {
+                            return 'Invalid price';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  ),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                    const SizedBox(width: 16),
+                    if (_selectedProductType == 'Packed')
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          controller: _numberOfItemsController,
+                          decoration: InputDecoration(
+                            labelText: 'Items per Pack*',
+                            prefixIcon: Icon(Icons.inventory),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            hintText: 'E.g., 6 pieces',
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          validator: (value) {
+                            if (_selectedProductType == 'Packed') {
+                              if (value == null || value.isEmpty) {
+                                return 'Enter items per pack';
+                              }
+                              if (int.tryParse(value) == null ||
+                                  int.parse(value) <= 0) {
+                                return 'Invalid number';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      )
+                    else
+                      Expanded(flex: 1, child: Container()),
                   ],
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter price';
-                    }
-                    if (double.tryParse(value) == null ||
-                        double.parse(value) <= 0) {
-                      return 'Invalid price';
-                    }
-                    return null;
-                  },
                 ),
+
                 const SizedBox(height: 16),
 
                 // Expiry Date Field
@@ -676,6 +761,7 @@ class _AddStockPageState extends State<AddStockPage> {
                     onTap: () => _selectDate(context),
                   ),
                 ),
+
                 const SizedBox(height: 24),
 
                 // Error Message
