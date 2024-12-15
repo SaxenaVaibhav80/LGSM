@@ -73,11 +73,14 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
           bool isInventoryEmpty = false;
 
           if (inventoryResponse.statusCode == 200) {
-            if (inventoryData['isInventory'] == true) {
-              isInventoryEmpty = true;
+            var looseList = inventoryData['loose'] ?? [];
+            var packedList = inventoryData['packed'] ?? [];
+
+            // Check if both loose and packed lists are empty
+            if (looseList.isEmpty && packedList.isEmpty) {
+              isInventoryEmpty = true; // Inventory is empty
             } else {
-              // Handle inventory data if needed (e.g., show items in inventory)
-              isInventoryEmpty = false;
+              isInventoryEmpty = false; // Inventory is not empty
             }
           } else {
             setState(() {
