@@ -422,17 +422,17 @@ app.post("/api/addStock", async (req, res) => {
       }
 
     
-      const existingProduct = await inventoryModel.findOne({
-        shop_id: shopkeeper.shop._id,
-        $or: [
-          { 'loose.productName': productName, 'loose.category': category },
-          { 'packed.productName': productName, 'packed.category': category }
-        ]
-      });
+      // const existingProduct = await inventoryModel.findOne({
+      //   shop_id: shopkeeper.shop._id,
+      //   $or: [
+      //     { 'loose.productName': productName, 'loose.category': category },
+      //     { 'packed.productName': productName, 'packed.category': category }
+      //   ]
+      // });
 
-      if (existingProduct) {
-        return res.status(400).json({ message: "Product already exists" });
-      }
+      // if (existingProduct) {
+      //   return res.status(400).json({ message: "Product already exists" });
+      // }
 
     
       if (productType === 'Loose') {
@@ -473,6 +473,61 @@ app.post("/api/addStock", async (req, res) => {
     return res.status(401).json({ message: "Unauthorized. Please login." });
   }
 });
+
+// ---------------------- serving all catagories--------------------------->
+
+app.post("/api/getCatagoriesAvailable",async(req,res)=>
+{
+  const token = req.body.token
+
+  if(token!=null && token!=undefined)
+  {
+   try{
+
+    const verification = jwt.verify(token,secret_key)
+    const shopkeeper_id = verification.id
+    const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id}).populate('shop')
+    const inventory= await inventoryModel.findOne({shop_id:shopkeeper.shop._id})
+    const categoryNames = inventory.categories.map((Categories) => Categories.category);
+
+    return res.status(200).json({
+      message: "Category names retrieved successfully",
+      categories: categoryNames,
+    });
+
+  }catch(err)
+   {
+      return res.send(500).json({message:"internal server error"})
+   } 
+  }
+})
+
+// ------------------------ get itemes corresponding to category----------------->
+
+app.post("/api/itemCorrespondToCategory",async(req,res)=>
+  {
+    const {token,category} = req.body
+  
+    if(token!=null && token!=undefined)
+    {
+     try{
+  
+      const verification = jwt.verify(token,secret_key)
+      const shopkeeper_id = verification.id
+      const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id}).populate('shop')
+      const inventory= await inventoryModel.findOne({shop_id:shopkeeper.shop._id})
+      const filteredLooseItems = inventory.loose.filter((item) => item.category === category);
+      const filteredPackedItems = inventory.packed.filter((item) => item.category === category);
+      
+      return res.send(200).json({looseArray:filteredLooseItems,packedArray:filteredPackedItems})
+    
+  
+    }catch(err)
+     {
+        return res.send(500).json({message:"internal server error"})
+     } 
+    }
+  })
 
 //----------------------- shopkeeper login router-------------------------->
 
