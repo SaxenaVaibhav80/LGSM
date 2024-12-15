@@ -10,6 +10,7 @@ const InventorySchema = new mongoose.Schema({
         {
            productName: String,
            productType:String,
+           description:String,
            category: String,
            quantity: Number,
            unit: String,
@@ -21,7 +22,9 @@ const InventorySchema = new mongoose.Schema({
         {
             productName: String,
             productType:String,
+            description:String,
             category: String,
+            noOfItems:Number,
             quantity: Number,
             unit: String,
             pricePerUnit: Number,
