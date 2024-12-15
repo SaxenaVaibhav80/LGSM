@@ -53,10 +53,41 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['success']) {
-          // Store the token (you might want to use secure storage)
+          // Store the token
           final token = responseData['data']['token'];
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('authToken', token);
+
+          // Check inventory status
+          final inventoryResponse = await http.post(
+            Uri.parse('http://localhost:9000/api/checkInventory'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({
+              'token': token,
+            }),
+          );
+
+          final inventoryData = json.decode(inventoryResponse.body);
+          bool isInventoryEmpty = false;
+
+          if (inventoryResponse.statusCode == 200) {
+            var looseList = inventoryData['loose'] ?? [];
+            var packedList = inventoryData['packed'] ?? [];
+
+            // Check if both loose and packed lists are empty
+            if (looseList.isEmpty && packedList.isEmpty) {
+              isInventoryEmpty = true; // Inventory is empty
+            } else {
+              isInventoryEmpty = false; // Inventory is not empty
+            }
+          } else {
+            setState(() {
+              _errorMessage =
+                  inventoryData['message'] ?? 'Error checking inventory.';
+            });
+          }
 
           if (!mounted) return;
 
@@ -66,8 +97,7 @@ class _ShopkeeperLoginScreenState extends State<ShopkeeperLoginScreen> {
             MaterialPageRoute(
               builder: (context) => ShopkeeperDashboard(
                 shopkeeperName: responseData['data']['name'],
-                hasInventory:
-                    true, // You might want to add this to your server response
+                hasInventory: !isInventoryEmpty, // Pass inventory status
               ),
             ),
           );

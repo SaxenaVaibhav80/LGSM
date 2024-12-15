@@ -119,7 +119,7 @@ app.post("/api/checkInventory",async(req,res)=>
       const verification = jwt.verify(token, secret_key);
       const shopkeeper_id = verification.id;
       const shopkeeper = await shopkeeperModel.findOne({_id:shopkeeper_id }).populate("shop");
-      const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('Inventory')
+      const shop = await ShopsModel.findOne({_id:shopkeeper.shop._id}).populate('inventory')
       console.log(shopkeeper)
   
 

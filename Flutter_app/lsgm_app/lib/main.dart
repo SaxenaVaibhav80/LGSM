@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lsgm_app/screens/role_selection_screen.dart';
 import 'package:lsgm_app/screens/shopkeeper_homeScreen.dart';
+import 'package:lsgm_app/screens/shopkeeper_inventoryPage.dart';
 import 'package:lsgm_app/screens/user_homeScreen.dart';
 import 'package:lsgm_app/theme/app_theme.dart';
 
